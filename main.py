@@ -276,9 +276,22 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
 def plot_graph(graph):
     G = nx.Graph()
 
-    # Adicionar nós
+    # Adicionar nós com atributo de região (CEP)
+    color_map = {"51000": "blue", "52000": "green", "53000": "orange", "54000": "purple"}
+    node_colors = []
+
     for node in graph['nodes']:
-        G.add_node(node['id'], pos=node['location'])
+        # Determinar a região e a cor com base no CEP
+        i, j = node['location']
+        if i < N // 4:
+            cep = "51000"  # Região 1
+        elif i > 3 * N // 4:
+            cep = "54000"  # Região 4
+        elif i >= N // 4 and i <= 3 * N // 4:
+            cep = "52000" if j < M // 2 else "53000"  # Região 2 ou 3
+
+        G.add_node(node['id'], pos=node['location'], region=cep)
+        node_colors.append(color_map[cep])  # Adiciona a cor correspondente
 
     # Adicionar arestas
     for edge in graph['edges']:
@@ -287,10 +300,13 @@ def plot_graph(graph):
     # Extrair posições para plotagem
     pos = nx.get_node_attributes(G, 'pos')
 
-    # Desenhar o grafo
+    # Desenhar o grafo com as cores dos nós
     plt.figure(figsize=(10, 10))
-    nx.draw(G, pos, with_labels=True, node_size=100, node_color='red', font_size=4, font_weight='bold')
-    plt.title("City Graph")
+    nx.draw(
+        G, pos, with_labels=True, node_size=100, node_color=node_colors,
+        font_size=4, font_weight='bold'
+    )
+    plt.title("City Graph - Nós Coloridos por Região")
     plt.show()
 
 # Parâmetros do grafo
