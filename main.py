@@ -4,15 +4,28 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 # Função para gerar um imóvel com probabilidade aleatória para tipo
-def generate_property(cep, street_name, number):
-    property_types = ['residential', 'commercial', 'industrial', 'touristic']
-    property_type = random.choice(property_types)  # Escolhe aleatoriamente o tipo do imóvel
-    return {
-        "cep": cep,
-        "street": street_name,
-        "number": number,
-        "type": property_type
-    }
+def generate_property(graph, cep, street_name, node_from, node_to):
+    property_counter = 0
+    # Gerar imóveis para a rua
+    for side in ["left", "right"]:
+        for k in range(1, 6):
+            if side == "left":
+                number = property_counter
+            else:
+                number = property_counter + 5
+            property_types = ['residential', 'commercial', 'industrial', 'touristic']
+            property_type = random.choice(property_types)  # Escolhe aleatoriamente o tipo do imóvel
+
+            graph['properties'].append( {
+                "cep": cep,
+                "street": street_name,
+                "number": number,
+                "type": property_type,
+                "from": node_from,
+                "to": node_to
+            })
+
+    return graph
 
 # Função principal para criar o grafo com propriedades e regiões, incluindo aleatoriedade nos vértices
 def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15, taxi_rate=4, non_motorized_speed=1.5):
@@ -201,6 +214,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                         }
                         graph["edges"].append(edge_data_taxi2)
 
+                        graph = generate_property(graph, cep, street_name, direction[1], direction[0])
+
             # Arestas verticais
             if i + 1 < N and nodes_exist.get((i + 1, j)):
                 neighbor_id = f"node_{i+1}_{j}"
@@ -254,17 +269,7 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                     }
                     graph["edges"].append(edge_data_taxi2)
 
-                # Gerar imóveis para a rua
-                for side in ["left", "right"]:
-                    for k in range(1, 6):
-                        if side == "left":
-                            number = property_counter
-                        else:
-                            number = property_counter + 5
-
-                        property = generate_property(cep, street_name, number)
-                        graph["properties"].append(property)
-                        property_counter += 1
+                    graph = generate_property(graph, cep, street_name, direction[1], direction[0])
 
     # Salvar o grafo em JSON
     with open('city_graph.json', 'w', encoding='utf-8') as f:
