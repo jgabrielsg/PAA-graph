@@ -1,35 +1,63 @@
-#pragma once
+// Graph.h
+#ifndef GRAPH_H
+#define GRAPH_H
 
+#include <string>
 #include <vector>
 #include <unordered_map>
+#include <utility>
+#include "external/json.hpp"
 
-namespace Graph {
+using json = nlohmann::json;
 
-    // Definição da estrutura de dados do grafo ponderado
-    struct Vertex {
-        int id;
-        // Outros atributos dos vértices (ex: coordenadas)
-    };
+// Structure to represent a Node
+struct Node {
+    std::string id;
+    std::pair<int, int> location;
+    std::vector<std::string> transport_options;
+    // std::string region; // Removed or made optional
+};
 
-    struct Edge {
-        int source;
-        int destination;
-        double weight;
-    };
+// Structure to represent an Edge
+struct Edge {
+    std::string from;
+    std::string to;
+    std::string transport_type;
+    double max_speed;
+    double distance;
+    double price_cost;
+    double time_cost;
+};
 
-    class WeightedGraph {
-    public:
-        void addVertex(const Vertex& vertex);
-        void addEdge(const Edge& edge);
-        // Outras operações para manipular o grafo
-    private:
-        std::vector<Vertex> vertices;
-        std::vector<Edge> edges;
-        std::unordered_map<int, std::vector<int>> adjacencyList;
-    };
+// Structure to represent a Property
+struct Property {
+    std::string cep;
+    std::string street;
+    int number;
+    std::string type;
+    std::string from;
+    std::string to;
+};
 
-    // Declaração de funções relacionadas ao grafo
-    void createGraph();
-    double getCostBetweenVertices(int source, int destination);
-    // Outras funções de consulta e manipulação do grafo
-}
+// Graph class
+class Graph {
+public:
+    Graph();
+    
+    bool loadFromJson(const std::string& filename);
+    
+    const std::vector<Node>& getNodes() const;
+    const std::vector<Edge>& getEdges() const;
+    const std::vector<Property>& getProperties() const;
+    
+    void printNodes() const;
+    void printEdges() const;
+    void printProperties() const;
+
+private:
+    std::vector<Node> nodes;
+    std::vector<Edge> edges;
+    std::vector<Property> properties;
+};
+
+#endif // GRAPH_H
