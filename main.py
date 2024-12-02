@@ -273,7 +273,7 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
     return graph
 
 # Função para plotar o grafo
-def plot_graph(graph):
+def create_graph(graph):
     G = nx.Graph()
 
     # Adicionar nós com atributo de região (CEP)
@@ -297,6 +297,9 @@ def plot_graph(graph):
     for edge in graph['edges']:
         G.add_edge(edge['from'], edge['to'], weight=edge['distance'], transport_type=edge['transport_type'])
 
+    return G, node_colors
+
+def plot_graph(G, node_colors):
     # Extrair posições para plotagem
     pos = nx.get_node_attributes(G, 'pos')
 
@@ -309,11 +312,14 @@ def plot_graph(graph):
     plt.title("City Graph - Nós Coloridos por Região")
     plt.show()
 
-# Parâmetros do grafo
-N, M = 24, 16  # Dimensões do grid
+if __name__ == '__main__':
+    # Parâmetros do grafo
+    N, M = 24, 16  # Dimensões do grid
 
-# Gerar o grafo
-graph = create_grid_graph_with_random_vertices(N, M)
+    # Gerar o grafo
+    graph = create_grid_graph_with_random_vertices(N, M)
 
-# Plotar o grafo
-plot_graph(graph)
+    graph, node_colors = create_graph(graph)
+
+    # Plotar o grafo
+    plot_graph(graph, node_colors)
