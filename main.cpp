@@ -21,9 +21,9 @@ int main() {
 
     // Optionally, print nodes, edges, and properties for verification
     // cityGraph.printNodes();
-    std::cout << std::endl;
-    cityGraph.printEdges();
-    std::cout << std::endl;
+    // std::cout << std::endl;
+    // cityGraph.printEdges();
+    // std::cout << std::endl;
     // cityGraph.printProperties();
     // std::cout << std::endl;
 
@@ -42,5 +42,5 @@ int main() {
         std::cout << "From: " << edge.from << " To: " << edge.to << " Cost: " << edge.price_cost << std::endl;
     }
 
-    return 0;
+    // return 0;
 }
