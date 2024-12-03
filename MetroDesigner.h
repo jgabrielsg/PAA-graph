@@ -25,8 +25,21 @@ private:
     double (*getCost)(const Edge&); // Function pointer to retrieve edge cost
 
     // Helper functions
-    std::unordered_map<std::string, double> dijkstra(const std::string& source, const std::set<std::string>& regionNodes);
-    std::vector<Edge> kruskalMST(const std::vector<Edge>& edges, const std::set<std::string>& stations);
+    void cptDijkstraFast(const std::string& source, std::unordered_map<std::string, double>& distances, std::unordered_map<std::string, std::string>& parent);
+    std::vector<Edge> kruskalMST(const std::vector<Edge>& allEdges, const std::set<std::string>& stations);
+
+    // UnionFind class for Kruskal's algorithm
+    class UnionFind {
+    public:
+        UnionFind(int numElements);
+
+        int findE(int e);
+        void unionE(int e1, int e2);
+
+    private:
+        std::vector<int> parent;
+        std::vector<int> rank;
+    };
 };
 
 #endif // METRODESIGNER_H

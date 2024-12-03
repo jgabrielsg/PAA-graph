@@ -1,4 +1,3 @@
-// Graph.h
 #ifndef GRAPH_H
 #define GRAPH_H
 
@@ -62,6 +61,9 @@ public:
     void printNodes() const;
     void printEdges() const;
     void printProperties() const;
+
+    // Add this declaration
+    std::unordered_map<std::string, double> getNeighbors(const std::string& nodeId) const;
 
 private:
     std::vector<Node> nodes;

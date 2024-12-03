@@ -3,79 +3,142 @@
 #include <limits>
 #include <algorithm>
 #include <iostream>
+#include <vector>
+#include <functional>
+#include <unordered_set>
+
+// Union-Find structure for Kruskal's algorithm
+MetroDesigner::UnionFind::UnionFind(int numElements)
+    : parent(numElements), rank(numElements, 0) {
+    for (int i = 0; i < numElements; ++i) {
+        parent[i] = i;
+    }
+}
+
+int MetroDesigner::UnionFind::findE(int e) {
+    if (parent[e] != e) {
+        parent[e] = findE(parent[e]); // Path compression
+    }
+    return parent[e];
+}
+
+void MetroDesigner::UnionFind::unionE(int e1, int e2) {
+    int root1 = findE(e1);
+    int root2 = findE(e2);
+
+    if (root1 != root2) {
+        // Union by rank
+        if (rank[root1] < rank[root2]) {
+            parent[root1] = root2;
+        } else if (rank[root1] > rank[root2]) {
+            parent[root2] = root1;
+        } else {
+            parent[root2] = root1;
+            rank[root1]++;
+        }
+    }
+}
 
 // Constructor
 MetroDesigner::MetroDesigner(const Graph& graph, const std::vector<Region>& regions, double (*costFunc)(const Edge&))
     : graph(graph), regions(regions), getCost(costFunc) {}
 
-// Dijkstra's algorithm for shortest paths
-std::unordered_map<std::string, double> MetroDesigner::dijkstra(const std::string& source, const std::set<std::string>& regionNodes) {
-    std::unordered_map<std::string, double> distances;
-    for (const auto& node : regionNodes) {
-        distances[node] = std::numeric_limits<double>::infinity();
-    }
-    distances[source] = 0.0;
-
+// Optimized Dijkstra's algorithm with heap (sem alterações)
+void MetroDesigner::cptDijkstraFast(const std::string& source, std::unordered_map<std::string, double>& distances, std::unordered_map<std::string, std::string>& parent) {
+    std::unordered_map<std::string, bool> checked;
     using pii = std::pair<double, std::string>;
-    std::priority_queue<pii, std::vector<pii>, std::greater<pii>> pq;
-    pq.emplace(0.0, source);
+    std::priority_queue<pii, std::vector<pii>, std::greater<pii>> heap;
 
-    std::unordered_map<std::string, std::vector<std::pair<std::string, double>>> adj;
-    for (const auto& edge : graph.getEdges()) {
-        adj[edge.from].emplace_back(edge.to, getCost(edge));
-        adj[edge.to].emplace_back(edge.from, getCost(edge)); // Assuming undirected graph
+    // Reset distances and parents
+    for (const auto& node : graph.getNodes()) {
+        distances[node.id] = std::numeric_limits<double>::infinity();
+        parent[node.id] = "";
+        checked[node.id] = false;
     }
 
-    while (!pq.empty()) {
-        auto [currentDist, currentNode] = pq.top();
-        pq.pop();
+    distances[source] = 0.0;
+    heap.emplace(0.0, source);
 
-        if (currentDist > distances[currentNode]) continue;
+    while (!heap.empty()) {
+        auto [currentDist, currentNode] = heap.top();
+        heap.pop();
 
-        for (const auto& [neighbor, weight] : adj[currentNode]) {
-            if (regionNodes.find(neighbor) == regionNodes.end()) continue;
+        if (checked[currentNode]) continue;
+        checked[currentNode] = true;
+
+        for (const auto& [neighbor, weight] : graph.getNeighbors(currentNode)) {
+            if (checked[neighbor]) continue;
 
             double newDist = currentDist + weight;
             if (newDist < distances[neighbor]) {
                 distances[neighbor] = newDist;
-                pq.emplace(newDist, neighbor);
+                parent[neighbor] = currentNode;
+                heap.emplace(newDist, neighbor);
             }
         }
     }
-
-    return distances;
 }
 
-// Kruskal's algorithm for Minimum Spanning Tree (MST)
-std::vector<Edge> MetroDesigner::kruskalMST(const std::vector<Edge>& edges, const std::set<std::string>& stations) {
-    std::unordered_map<std::string, std::string> parent;
-    for (const auto& station : stations) {
-        parent[station] = station;
+// Kruskal's MST algorithm modificado
+std::vector<Edge> MetroDesigner::kruskalMST(const std::vector<Edge>& allEdges, const std::set<std::string>& stations) {
+    std::cout << "Entrando em kruskalMST com " << allEdges.size() << " arestas e " << stations.size() << " estações." << std::endl;
+
+    // Mapeamento de IDs de nós para índices
+    std::unordered_map<std::string, int> nodeIdToIndex;
+    int index = 0;
+    for (const auto& node : graph.getNodes()) {
+        nodeIdToIndex[node.id] = index++;
     }
 
-    std::function<std::string(const std::string&)> findSet = [&](const std::string& x) -> std::string {
-        if (parent[x] != x) parent[x] = findSet(parent[x]);
-        return parent[x];
-    };
+    UnionFind uf(graph.getNodes().size());
 
-    std::vector<Edge> sortedEdges = edges;
+    // Ordenar todas as arestas por custo
+    std::vector<Edge> sortedEdges = allEdges;
     std::sort(sortedEdges.begin(), sortedEdges.end(), [&](const Edge& a, const Edge& b) {
         return getCost(a) < getCost(b);
     });
 
     std::vector<Edge> mst;
+    // Para rastrear quais estações já estão conectadas
+    // Inicialmente, cada estação está em seu próprio conjunto
+    std::unordered_set<int> stationIndices;
+    for (const auto& station : stations) {
+        stationIndices.insert(nodeIdToIndex[station]);
+    }
+
+    // Número de estações que já estão conectadas
+    int connectedStations = 1;
+
     for (const auto& edge : sortedEdges) {
-        if (stations.find(edge.from) == stations.end() || stations.find(edge.to) == stations.end()) continue;
+        int idxFrom = nodeIdToIndex[edge.from];
+        int idxTo = nodeIdToIndex[edge.to];
 
-        std::string root1 = findSet(edge.from);
-        std::string root2 = findSet(edge.to);
+        int leader1 = uf.findE(idxFrom);
+        int leader2 = uf.findE(idxTo);
 
-        if (root1 != root2) {
+        if (leader1 != leader2) {
+            uf.unionE(leader1, leader2);
             mst.push_back(edge);
-            parent[root1] = root2;
-        }
+            std::cout << "Aresta adicionada ao MST: " << edge.from << " - " << edge.to << " Custo: " << getCost(edge) << std::endl;
 
-        if (mst.size() == stations.size() - 1) break;
+            // Verificar se as estações estão todas conectadas
+            bool allConnected = true;
+            int firstLeader = -1;
+            for (const auto& station : stations) {
+                int stationLeader = uf.findE(nodeIdToIndex[station]);
+                if (firstLeader == -1) {
+                    firstLeader = stationLeader;
+                } else if (stationLeader != firstLeader) {
+                    allConnected = false;
+                    break;
+                }
+            }
+
+            if (allConnected) {
+                std::cout << "Todas as estações selecionadas estão agora conectadas." << std::endl;
+                break;
+            }
+        }
     }
 
     return mst;
@@ -83,27 +146,32 @@ std::vector<Edge> MetroDesigner::kruskalMST(const std::vector<Edge>& edges, cons
 
 // Main metro excavation design algorithm
 std::vector<Edge> MetroDesigner::escavacaoMetro() {
+    std::cout << "Iniciando escavacaoMetro..." << std::endl;
     std::set<std::string> selectedStations;
 
     // Step 1: Determine optimal station for each region
     for (const auto& region : regions) {
-        std::set<std::string> regionNodes(region.nodes.begin(), region.nodes.end());
         std::string bestStation = "";
         double bestMaxDistance = std::numeric_limits<double>::infinity();
 
-        for (const auto& candidate : region.nodes) {
-            auto distances = dijkstra(candidate, regionNodes);
-            double currentMax = 0.0;
+        std::unordered_map<std::string, double> distances;
+        std::unordered_map<std::string, std::string> parent;
 
-            for (const auto& [node, dist] : distances) {
+        for (const auto& candidate : region.nodes) {
+            cptDijkstraFast(candidate, distances, parent);
+
+            double currentMax = 0.0;
+            bool valid = true;
+            for (const auto& nodeInRegion : region.nodes) {
+                double dist = distances[nodeInRegion];
                 if (dist == std::numeric_limits<double>::infinity()) {
-                    currentMax = std::numeric_limits<double>::infinity();
+                    valid = false;
                     break;
                 }
                 currentMax = std::max(currentMax, dist);
             }
 
-            if (currentMax < bestMaxDistance) {
+            if (valid && currentMax < bestMaxDistance) {
                 bestMaxDistance = currentMax;
                 bestStation = candidate;
             }
@@ -111,26 +179,31 @@ std::vector<Edge> MetroDesigner::escavacaoMetro() {
 
         if (!bestStation.empty()) {
             selectedStations.insert(bestStation);
+            std::cout << "Estação selecionada: " << bestStation << " para a região: " << region.name << std::endl;
+        } else {
+            std::cout << "Nenhuma estação selecionada para a região: " << region.name << std::endl;
         }
     }
 
-    // Step 2: Collect edges between selected stations
-    std::vector<Edge> candidateEdges;
-    for (const auto& edge : graph.getEdges()) {
-        if (selectedStations.count(edge.from) && selectedStations.count(edge.to)) {
-            candidateEdges.push_back(edge);
-        }
+    // Imprimir todas as estações selecionadas
+    std::cout << "\nEstações selecionadas:" << std::endl;
+    for (const auto& station : selectedStations) {
+        std::cout << " - " << station << std::endl;
     }
 
-    // Step 3: Apply Kruskal's algorithm to find MST
-    std::vector<Edge> mst = kruskalMST(candidateEdges, selectedStations);
+    // Step 2: Coletar todas as arestas do grafo
+    std::vector<Edge> allEdges = graph.getEdges();
+    std::cout << "\nTotal de arestas no grafo: " << allEdges.size() << std::endl;
 
-    // Optionally calculate total cost
+    // Passar todas as arestas para Kruskal
+    std::vector<Edge> mst = kruskalMST(allEdges, selectedStations);
+
+    // Calcular o custo total
     double totalCost = 0.0;
     for (const auto& edge : mst) {
         totalCost += getCost(edge);
     }
-    std::cout << "Total excavation cost: " << totalCost << std::endl;
+    std::cout << "Custo total de escavação: " << totalCost << std::endl;
 
     return mst;
 }

@@ -1,4 +1,3 @@
-// Graph.cpp
 #include "Graph.h"
 #include <fstream>
 #include <iostream>
@@ -15,6 +14,11 @@ void loadField(const json& j, const std::string& key, T& field) {
 // Function to load graph from JSON
 bool Graph::loadFromJson(const std::string& filename) {
     std::ifstream infile(filename);
+    if (!infile.is_open()) {
+        std::cerr << "Erro ao abrir o arquivo: " << filename << std::endl;
+        return false;
+    }
+
     json j;
     infile >> j;
 
@@ -68,6 +72,12 @@ bool Graph::loadFromJson(const std::string& filename) {
 
     // Group nodes into regions
     groupNodesIntoRegions();
+
+    // Debug: Imprimir algumas arestas carregadas
+    std::cout << "Total de arestas carregadas: " << edges.size() << std::endl;
+    for (size_t i = 0; i < std::min(edges.size(), size_t(5)); ++i) { // Imprime as primeiras 5 arestas
+        std::cout << "Aresta " << i+1 << ": " << edges[i].from << " - " << edges[i].to << std::endl;
+    }
 
     return true;
 }
@@ -130,4 +140,21 @@ void Graph::printProperties() const {
                   << ", To: " << prop.to
                   << std::endl;
     }
+}
+
+std::unordered_map<std::string, double> Graph::getNeighbors(const std::string& nodeId) const {
+    std::unordered_map<std::string, double> neighbors;
+
+    for (const auto& edge : edges) {
+        if (edge.from == nodeId) {
+            neighbors[edge.to] = edge.distance;
+        } else if (edge.to == nodeId) {
+            neighbors[edge.from] = edge.distance; 
+        }
+    }
+
+    std::cout << "Obtendo vizinhos para o nó " << nodeId << ": " 
+              << neighbors.size() << " vizinhos encontrados." << std::endl;
+
+    return neighbors;
 }
