@@ -26,6 +26,7 @@ bool Graph::loadFromJson(const std::string& filename) {
     nodes.clear();
     edges.clear();
     properties.clear();
+    regions.clear(); // Clear existing regions
 
     try {
         // Load nodes
@@ -58,14 +59,13 @@ bool Graph::loadFromJson(const std::string& filename) {
                     continue;
                 }
 
-                // Optionally handle 'region' if present
-                /*
+                // Region
                 if (node_json.contains("region") && node_json["region"].is_string()) {
                     node.region = node_json["region"].get<std::string>();
                 } else {
-                    node.region = "Unknown"; // Default value or handle accordingly
+                    std::cerr << "Error: Node " << node.id << " has invalid or missing 'region'." << std::endl;
+                    continue;
                 }
-                */
 
                 nodes.push_back(node);
             }
@@ -202,7 +202,32 @@ bool Graph::loadFromJson(const std::string& filename) {
     }
 
     infile.close();
+
+    // Group nodes into regions
+    groupNodesIntoRegions();
+
     return true;
+}
+
+// Getter for regions
+const std::vector<Region>& Graph::getRegions() const {
+    return regions;
+}
+
+// Function to group nodes into regions based on their 'region' attribute
+void Graph::groupNodesIntoRegions() {
+    std::unordered_map<std::string, std::vector<std::string>> temp_regions;
+
+    for (const auto& node : nodes) {
+        temp_regions[node.region].push_back(node.id);
+    }
+
+    for (const auto& [region_name, node_ids] : temp_regions) {
+        Region region;
+        region.name = region_name;
+        region.nodes = node_ids;
+        regions.push_back(region);
+    }
 }
 
 // Getters

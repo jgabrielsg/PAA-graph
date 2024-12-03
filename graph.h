@@ -15,7 +15,7 @@ struct Node {
     std::string id;
     std::pair<int, int> location;
     std::vector<std::string> transport_options;
-    // std::string region; // Removed or made optional
+    std::string region; // Added region attribute
 };
 
 // Structure to represent an Edge
@@ -39,6 +39,12 @@ struct Property {
     std::string to;
 };
 
+// Structure to represent a Region
+struct Region {
+    std::string name;               // Region name (e.g., "Region1")
+    std::vector<std::string> nodes; // Node IDs belonging to the region
+};
+
 // Graph class
 class Graph {
 public:
@@ -50,6 +56,9 @@ public:
     const std::vector<Edge>& getEdges() const;
     const std::vector<Property>& getProperties() const;
     
+    // Added getter for regions
+    const std::vector<Region>& getRegions() const;
+    
     void printNodes() const;
     void printEdges() const;
     void printProperties() const;
@@ -58,6 +67,10 @@ private:
     std::vector<Node> nodes;
     std::vector<Edge> edges;
     std::vector<Property> properties;
+    std::vector<Region> regions; // Stored regions
+
+    // Helper to group nodes into regions
+    void groupNodesIntoRegions();
 };
 
 #endif // GRAPH_H

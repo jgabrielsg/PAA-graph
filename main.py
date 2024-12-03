@@ -24,7 +24,6 @@ def generate_property(graph, cep, street_name, node_from, node_to):
                 "from": node_from,
                 "to": node_to
             })
-
     return graph
 
 # Função principal para criar o grafo com propriedades e regiões, incluindo aleatoriedade nos vértices
@@ -71,15 +70,32 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
         for j in range(M):
             if random.random() >= 0.3:
                 node_id = f"node_{i}_{j}"
+                
+                # Determine the region based on (i, j)
+                if i < N // 4:
+                    cep = "51000"  # Região 1
+                    region = "Region1"
+                elif i > 3 * N // 4:
+                    cep = "54000"  # Região 4
+                    region = "Region4"
+                elif i >= N // 4 and i <= 3 * N // 4:
+                    if j < M // 2:
+                        cep = "52000"  # Região 2
+                        region = "Region2"
+                    else:
+                        cep = "53000"  # Região 3
+                        region = "Region3"
+                
                 node_data = {
                     "id": node_id,
                     "location": (i, j),
-                    "transport_options": ["taxi", "non_motorized"],  # Táxi e não motorizado
+                    "transport_options": ["taxi", "non_motorized"],
+                    "region": region  # Added region information
                 }
                 graph["nodes"].append(node_data)
-                nodes_exist[(i, j)] = True  # Marca o nó como existente
+                nodes_exist[(i, j)] = True
             else:
-                nodes_exist[(i, j)] = False  # Marca o nó como inexistente
+                nodes_exist[(i, j)] = False
 
     # Gerando as arestas e imóveis somente entre nós existentes
     property_counter = 1  # Contador de imóveis para manter a numeração contínua
@@ -90,17 +106,6 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                 continue  # Pula se o nó não existir
 
             node_id = f"node_{i}_{j}"
-
-            # Determinar a região e o CEP de acordo com a posição (i, j)
-            if i < N // 4:
-                cep = "51000"  # Região 1
-            elif i > 3 * N // 4:
-                cep = "54000"  # Região 4
-            elif i >= N // 4 and i <= 3 * N // 4:
-                if j < M // 2:
-                    cep = "52000"  # Região 2
-                else:
-                    cep = "53000"  # Região 3
 
             # Arestas horizontais
             if j + 1 < M:
@@ -213,8 +218,6 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                             "time_cost": distance / max_speed
                         }
                         graph["edges"].append(edge_data_taxi2)
-
-                        graph = generate_property(graph, cep, street_name, direction[1], direction[0])
 
             # Arestas verticais
             if i + 1 < N and nodes_exist.get((i + 1, j)):
