@@ -134,7 +134,7 @@ void mstKruskalFast(const Graph& graph, std::vector<Edge>& mstEdges) {
     }
 }
 
-void findStations(const Graph& graph, std::unordered_map<std::string, std::string>& result) {
+void findStations(const Graph& graph, std::unordered_map<int, std::string>& result) {
     const std::vector<Node>& nodes = graph.getNodes();
     const std::vector<Region>& regions = graph.getRegions();
     
@@ -168,6 +168,6 @@ void findStations(const Graph& graph, std::unordered_map<std::string, std::strin
         }
 
         // Store the node with the minimum of maximum distances for the region
-        result[region.name] = bestNode;
+        result[region.number] = bestNode;
     }
 }

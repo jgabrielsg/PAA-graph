@@ -46,7 +46,7 @@ struct Property {
 
 // Structure to represent a Region
 struct Region {
-    std::string name;                // Region name (e.g., "Region1")
+    int number;                // Region name (e.g., "Region1")
     std::vector<std::string> nodes;  // Node IDs belonging to the region
 };
 

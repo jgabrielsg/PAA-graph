@@ -1,3 +1,4 @@
+#include "Graph.h"  // Supondo que a classe Graph esteja aqui
 #include <iostream>
 #include <vector>
 #include <string>
@@ -5,6 +6,7 @@
 #include <functional>
 #include <chrono>
 #include <thread>
+#include <random>
 #include <future>  // Para usar std::future
 
 using namespace std;
@@ -55,10 +57,63 @@ class Cidade {
 public:
     unordered_map<string, vector<pair<string, double>>> grafo;  // Mapeia cada cruzamento para os vizinhos e tempo
 
-    // Adiciona uma aresta ao grafo
-    void adicionar_aresta(const string& origem, const string& destino, double tempo) {
-        grafo[origem].push_back({destino, tempo});
-        grafo[destino].push_back({origem, tempo});
+    // Carrega o grafo a partir de um arquivo JSON
+    bool carregar_grafo_de_json(const string& arquivo_json) {
+        Graph graph;
+        if (!graph.loadFromJson(arquivo_json)) {
+            return false; // Se não conseguir carregar o grafo, retorna false
+        }
+
+        // Preenche o grafo da cidade com os dados do grafo carregado
+        for (const auto& node : graph.getNodes()) {
+            // Adiciona as arestas de cada nó
+            for (const auto& edge : graph.getEdges()) {
+                if (edge.from == node.id) {
+                    // Adiciona a aresta com o tempo de deslocamento (time_cost)
+                    grafo[edge.from].push_back({edge.to, edge.time_cost/10});
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // Função auxiliar para criar um caminho aleatório
+    vector<string> gerar_caminho_aleatorio(int n) {
+        vector<string> caminho;
+        vector<string> nodes;
+        // Preenche o vetor com todos os nós do grafo
+        for (const auto& pair : grafo) {
+            nodes.push_back(pair.first);
+        }
+
+        // Gerando um caminho aleatório
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(0, nodes.size() - 1);
+
+        string node_atual = nodes[dis(gen)]; // Pega um nó aleatório para começar
+        caminho.push_back(node_atual);
+
+        for (int i = 0; i < n - 1; ++i) {
+            // Seleciona um vizinho aleatório para o próximo nó
+            auto& vizinhos = grafo[node_atual];
+            uniform_int_distribution<> dis_vizinho(0, vizinhos.size() - 1);
+            int vizinho_index = dis_vizinho(gen);
+            node_atual = vizinhos[vizinho_index].first;  // O próximo cruzamento
+            caminho.push_back(node_atual);
+        }
+
+        return caminho;
+    }
+
+    // Função para exibir o caminho aleatório gerado
+    void exibir_caminho_aleatorio(const Pessoa& pessoa) {
+        cout << "Caminho aleatorio gerado para " << pessoa.nome << ": ";
+        for (const auto& cruzamento : pessoa.caminho) {
+            cout << cruzamento << " ";
+        }
+        cout << endl;
     }
 
     // Atualiza a posição de uma pessoa e imprime o evento
@@ -89,7 +144,7 @@ void Pessoa::mover(Cidade& cidade) {
         string cruzamento_atual = caminho[i];
         string proximo_cruzamento = caminho[i + 1];
 
-        // Encontrando o tempo para percorrer essa rua
+        // Encontrando o tempo para percorrer essa rua usando time_cost
         double tempo_rua = 0;
         for (auto& vizinho : cidade.grafo[cruzamento_atual]) {
             if (vizinho.first == proximo_cruzamento) {
@@ -115,16 +170,19 @@ void Pessoa::mover(Cidade& cidade) {
 int main() {
     Cidade cidade;
 
-    // Adicionando ruas (arestas) ao grafo
-    cidade.adicionar_aresta("A", "B", 1);  // Rua de A para B com tempo de 1 segundo
-    cidade.adicionar_aresta("B", "C", 1);  // Rua de B para C com tempo de 4 segundos
-    cidade.adicionar_aresta("C", "D", 1);  // Rua de C para D com tempo de 4 segundos
-    cidade.adicionar_aresta("X", "Y", 4);  // Rua de X para Y com tempo de 1 segundo
-    cidade.adicionar_aresta("Y", "Z", 10); // Rua de Y para Z com tempo de 10 segundos
+    // Carrega o grafo do arquivo JSON
+    if (!cidade.carregar_grafo_de_json("city_graph.json")) {
+        cerr << "Erro ao carregar o grafo do arquivo JSON!" << endl;
+        return 1;
+    }
 
-    // Criando pessoas e passando o caminho completo
-    Pessoa pessoa1("Fulano", {"A", "B", "C", "D", "C", "B", "A"});  // Fulano começa em "A" e quer ir até "D"
-    Pessoa pessoa2("Ciclano", {"X", "Y", "Z"});  // Ciclano começa em "X" e quer ir até "Z"
+    // Criando pessoas e atribuindo caminhos aleatórios
+    Pessoa pessoa1("Fulano", cidade.gerar_caminho_aleatorio(5));  // Caminho aleatório de tamanho 5
+    Pessoa pessoa2("Ciclano", cidade.gerar_caminho_aleatorio(5));  // Caminho aleatório de tamanho 5
+
+    // Exibindo os caminhos aleatórios
+    cidade.exibir_caminho_aleatorio(pessoa1);
+    cidade.exibir_caminho_aleatorio(pessoa2);
 
     // Simulando a movimentação das pessoas
     vector<Pessoa> pessoas = {pessoa1, pessoa2};

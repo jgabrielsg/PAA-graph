@@ -28,6 +28,6 @@ private:
 // Kruskal's Minimum Spanning Tree (MST) algorithm
 void mstKruskalFast(const Graph& graph, std::vector<Edge>& mstEdges);
 
-void findStations(const Graph& graph, std::unordered_map<std::string, std::string>& result);
+void findStations(const Graph& graph, std::unordered_map<int, std::string>& result);
 
 #endif // DIJKSTRA_H
