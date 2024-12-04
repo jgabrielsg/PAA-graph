@@ -32,7 +32,7 @@ int main() {
     // Retrieve regions from the graph
     const std::vector<Region>& regions = cityGraph.getRegions();
 
-    std::unordered_map<std::string, std::string> result;
+    std::unordered_map<int, std::string> result;
 
     findStations(cityGraph, result);
 

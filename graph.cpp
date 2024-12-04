@@ -90,7 +90,7 @@ bool Graph::loadFromJson(const std::string& filename) {
 
 // Group nodes into regions
 void Graph::groupNodesIntoRegions() {
-    std::unordered_map<std::string, std::vector<std::string>> temp_regions;
+    std::unordered_map<int, std::vector<std::string>> temp_regions;
     for (const auto& node : nodes) {
         temp_regions[node.region].push_back(node.id);
     }
