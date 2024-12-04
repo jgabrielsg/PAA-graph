@@ -1,9 +1,11 @@
 #include "newMetro.h"
 #include "dataStructures.h"
+#include "graph.h"
 #include <unordered_map>
 #include <climits>
 #include <algorithm>
 #include <vector>
+#include <string>
 
 // Dijkstra Fast Implementation
 void cptDijkstraFast(const Graph& graph, const std::string& v0_id, std::vector<std::string>& parent, std::vector<int>& distance) {
@@ -73,12 +75,12 @@ UnionFind::~UnionFind() {
 }
 
 int UnionFind::findE(int e) {
-    int eLeader = e;
-    while (eLeader != m_group[eLeader]) {
-        eLeader = m_group[eLeader];
+    if (e != m_group[e]) {
+        m_group[e] = findE(m_group[e]);  // Path compression
     }
-    return eLeader;
+    return m_group[e];
 }
+
 
 void UnionFind::unionE(int e1, int e2) {
     int leader1 = findE(e1);
@@ -171,3 +173,97 @@ void findStations(const Graph& graph, std::unordered_map<int, std::string>& resu
         result[region.number] = bestNode;
     }
 }
+
+std::vector<std::pair<std::string, std::string>> Graph::getPathFromParents(
+    const std::vector<std::string>& parent, const std::string& start, const std::string& end) const {
+
+    std::vector<std::pair<std::string, std::string>> path;
+    std::string current = end;
+
+    while (current != start) {
+        std::string prev = parent[getNodeIndex(current)];
+        path.push_back({prev, current});
+        current = prev;
+    }
+
+    std::reverse(path.begin(), path.end());
+    return path;
+}
+
+void findBestStations(Graph& graph, std::unordered_map<int, std::string>& bestStations) {
+    const std::vector<Region>& regions = graph.getRegions();
+    const std::vector<Node>& nodes = graph.getNodes();
+
+    for (const auto& region : regions) {
+        int minMaxDist = INT_MAX;
+        std::string bestNode;
+
+        // Iterate over each node in the region
+        for (const auto& nodeId : region.nodes) {
+            // Run Dijkstra from this node
+            std::vector<std::string> parent;
+            std::vector<int> distance;
+            cptDijkstraFast(graph, nodeId, parent, distance);
+
+            // Find the maximum distance to nodes in the same region
+            int maxDist = -1;
+            for (const auto& otherNodeId : region.nodes) {
+                if (nodeId != otherNodeId) {
+                    int otherNodeIndex = graph.getNodeIndex(otherNodeId);
+                    maxDist = std::max(maxDist, distance[otherNodeIndex]);
+                }
+            }
+
+            // Update the best node for this region
+            if (maxDist < minMaxDist) {
+                minMaxDist = maxDist;
+                bestNode = nodeId;
+            }
+        }
+
+        // Store the best station for this region
+        bestStations[region.number] = bestNode;
+    }
+}
+void createGraphFromBestStations(
+    const std::unordered_map<int, std::string>& bestStations,
+    Graph& newGraph, Graph& oldGraph) {
+
+    // Retrieve nodes and edges from the original graph
+    const std::vector<Node>& nodes = oldGraph.getNodes();
+    const std::vector<Edge>& edges = oldGraph.getEdges();
+
+    // Add nodes that are part of bestStations
+    for (const auto& entry : bestStations) {
+        std::string stationId = entry.second;
+        const auto& node = *std::find_if(nodes.begin(), nodes.end(),
+                                         [&stationId](const Node& n) { return n.id == stationId; });
+        newGraph.addNode(node);
+    }
+
+    // Add nodes connected by edges (if the edge is between bestStations)
+    for (const auto& edge : edges) {
+        bool isFromBestStation = bestStations.find(oldGraph.getNodeIndex(edge.from)) != bestStations.end();
+        bool isToBestStation = bestStations.find(oldGraph.getNodeIndex(edge.to)) != bestStations.end();
+
+        // If both ends of the edge are in the bestStations, add the edge to newGraph
+        if (isFromBestStation && isToBestStation) {
+            newGraph.addEdge(edge);
+        } else {
+            // Add the node connected by the edge if it is not already part of bestStations
+            if (isFromBestStation) {
+                const auto& nodeToAdd = *std::find_if(nodes.begin(), nodes.end(),
+                                                      [&edge](const Node& n) { return n.id == edge.to; });
+                newGraph.addNode(nodeToAdd);
+            }
+            if (isToBestStation) {
+                const auto& nodeToAdd = *std::find_if(nodes.begin(), nodes.end(),
+                                                      [&edge](const Node& n) { return n.id == edge.from; });
+                newGraph.addNode(nodeToAdd);
+            }
+        }
+    }
+}
+
+
+

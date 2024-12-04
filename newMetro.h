@@ -1,33 +1,48 @@
-#ifndef DIJKSTRA_H
-#define DIJKSTRA_H
+#ifndef NEWMETRO_H
+#define NEWMETRO_H
 
-#include "graph.h"
 #include "dataStructures.h"
+#include "graph.h"
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <climits>
 
-// Function declarations for Dijkstra's algorithm
-void cptDijkstraFast(const Graph& graph, const std::string& v0_id, std::vector<std::string>& parent, std::vector<int>& distance);
+// Forward declarations of data structures
+class Node;
+class Edge;
+class Region;
+class UnionFind;
 
-// UnionFind class for Kruskal's MST algorithm
+// The UnionFind data structure for Kruskal's algorithm
 class UnionFind {
 public:
     UnionFind(int numElements);
     ~UnionFind();
-    
     int findE(int e);
     void unionE(int e1, int e2);
-
+    
 private:
     int m_numElements;
     int* m_group;
     int* m_groupSize;
 };
 
-// Kruskal's Minimum Spanning Tree (MST) algorithm
-void mstKruskalFast(const Graph& graph, std::vector<Edge>& mstEdges);
+// Dijkstra's algorithm for shortest paths (fast implementation)
+void cptDijkstraFast(const Graph&, const std::string&, std::vector<std::string>&, std::vector<int>&);
 
-void findStations(const Graph& graph, std::unordered_map<int, std::string>& result);
+// Kruskal's Minimum Spanning Tree algorithm (MST)
+void mstKruskalFast(const Graph&, std::vector<Edge>&);
 
-#endif // DIJKSTRA_H
+// Method for finding the best stations in the graph
+void findStations(const Graph&, std::unordered_map<int, std::string>&);
+
+// Method for finding the best stations (updated version)
+void findBestStations(const Graph&, std::unordered_map<int, std::string>& );
+
+// Create a graph from the best stations
+void createGraphFromBestStations(
+    const std::unordered_map<int, std::string>&,
+    Graph& , Graph& );
+
+#endif // NEWMETRO_H

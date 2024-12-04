@@ -57,12 +57,10 @@ public:
     
     bool loadFromJson(const std::string& filename);
     
-    const std::vector<Node>& getNodes() const;
-    const std::vector<Edge>& getEdges() const;
-    const std::vector<Property>& getProperties() const;
-    
-    // Added getter for regions
-    const std::vector<Region>& getRegions() const;
+    const std::vector<Region>& getRegions() const ;
+    const std::vector<Node>& getNodes() const ;
+    const std::vector<Edge>& getEdges() const ;
+    const std::vector<Property>& getProperties() const; 
     
     // New methods to add nodes, edges, and properties
     void addNode(const Node& node);
@@ -75,6 +73,23 @@ public:
 
     // Add this declaration
     std::unordered_map<std::string, double> getNeighbors(const std::string& nodeId) const;
+
+    // Add this new declaration for getNodeIndex
+    int getNodeIndex(const std::string& nodeId) const;
+
+    // Add this new declaration for getRegionNumber
+    int getRegionNumber(const std::string& nodeId) const;
+
+    // Add these for pathfinding
+    std::vector<std::pair<std::string, std::string>> getPathFromParents(
+        const std::vector<std::string>& parent, const std::string& start, const std::string& end) const;
+
+    void findBestStationsAndPaths(std::vector<std::string>& bestStations, 
+                                  std::vector<std::vector<std::string>>& parentsList) const;
+
+    void createGraphFromBestStations(const std::vector<std::string>& bestStations,
+                                     const std::vector<std::vector<std::string>>& parentsList,
+                                     Graph& newGraph) const;
 
 private:
     std::vector<Node> nodes;

@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 
-// Define the cost function (e.g., using 'price_cost' as excavation cost)
 double getPriceCost(const Edge& edge) {
     return edge.price_cost;
 }
@@ -21,24 +20,43 @@ int main() {
     }
     std::cout << "Grafo carregado com sucesso." << std::endl;
 
-    // Optionally, print nodes, edges, and properties for verification
-    // cityGraph.printNodes();
-    // std::cout << std::endl;
-    // cityGraph.printEdges();
-    // std::cout << std::endl;
-    // cityGraph.printProperties();
-    // std::cout << std::endl;
-
     // Retrieve regions from the graph
     const std::vector<Region>& regions = cityGraph.getRegions();
 
     std::unordered_map<int, std::string> result;
-
-    findStations(cityGraph, result);
+    findBestStations(cityGraph, result);
 
     // Print results
     for (const auto& entry : result) {
         std::cout << "Region: " << entry.first << ", Best Node: " << entry.second << std::endl;
     }
+
+    Graph newGraph;
+    createGraphFromBestStations(result, newGraph, cityGraph);
+
+    std::cout << "Novo grafo com as melhores estações criado." << std::endl;
+    std::cout << "Número de nós no novo grafo: " << newGraph.getNodes().size() << std::endl;
+    std::cout << "Número de arestas no novo grafo: " << newGraph.getEdges().size() << std::endl;
+
+    std::vector<Edge> mstEdges;
+    mstKruskalFast(newGraph, mstEdges);
+
+    mstEdges = newGraph.getEdges();
+
+    // Print MST edges
+    if (!mstEdges.empty()) {
+        std::cout << "[";
+        for (size_t i = 0; i < mstEdges.size(); ++i) {
+            const auto& entry = mstEdges[i];
+            std::cout << "('" << entry.from << "','" << entry.to << "')";
+            if (i < mstEdges.size() - 1) {
+                std::cout << ",";  // Add a comma if it's not the last element
+            }
+        }
+        std::cout << "]" << std::endl;
+    } else {
+        std::cout << "No edges in MST." << std::endl;
+    }
+
     return 0;
 }

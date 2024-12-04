@@ -1,4 +1,4 @@
-#include "Graph.h"
+#include "graph.h"
 #include <fstream>
 #include <iostream>
 
@@ -8,13 +8,8 @@ Graph::Graph() {}
 // Helper function to load a field from JSON
 template<typename T>
 void loadField(const json& j, const std::string& key, T& field) {
-    if (j.contains(key)) {
-        field = j[key].get<T>();
-    } else {
-        std::cerr << "Warning: Key '" << key << "' not found in the JSON!" << std::endl;
-    }
+    field = j[key].get<T>();
 }
-
 
 // Function to load graph from JSON
 bool Graph::loadFromJson(const std::string& filename) {
@@ -180,4 +175,23 @@ std::unordered_map<std::string, double> Graph::getNeighbors(const std::string& n
     }
 
     return neighbors;
+}
+
+// Get the index of a node by its ID
+int Graph::getNodeIndex(const std::string& nodeId) const {
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        if (nodes[i].id == nodeId) {
+            return static_cast<int>(i);  // Return the index if found
+        }
+    }
+    return -1;  // Return -1 if the node ID is not found
+}
+
+int Graph::getRegionNumber(const std::string& nodeId) const {
+    for (const auto& node : nodes) {
+        if (node.id == nodeId) {
+            return node.region;  // Return the region number for the node
+        }
+    }
+    return -1;  // Return -1 if the node is not found
 }

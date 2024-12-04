@@ -308,7 +308,7 @@ if __name__ == '__main__':
     G, node_colors = create_graph(graph, N, M)
 
     # Definir as arestas a serem destacadas
-    highlighted_edges = [('node_11_9','node_11_11'),('node_12_4','node_12_3'),('node_1_7','node_1_6'),('node_20_7','node_20_6'),]    
+    highlighted_edges = [('node_0_2','node_0_5'),('node_0_5','node_0_2'),('node_0_2','node_0_5'),('node_0_5','node_0_2'),('node_0_5','node_0_6'),('node_0_6','node_0_5'),('node_0_5','node_0_6'),('node_0_6','node_0_5'),('node_0_6','node_0_7'),('node_0_7','node_0_6'),('node_0_6','node_0_7'),('node_0_7','node_0_6')]
     highlighted_edges_set = set(tuple(sorted(edge)) for edge in highlighted_edges)
 
     # Verificar quais arestas destacadas realmente existem no grafo
