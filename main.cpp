@@ -1,5 +1,6 @@
-#include "Graph.h"
-#include "MetroDesigner.h"
+#include "graph.h"
+#include "newMetro.h"
+#include "dataStructures.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -30,23 +31,14 @@ int main() {
 
     // Retrieve regions from the graph
     const std::vector<Region>& regions = cityGraph.getRegions();
-    std::cout << "Número de regiões: " << regions.size() << std::endl;
 
-    // Initialize MetroDesigner with the graph, regions, and cost function
-    MetroDesigner designer(cityGraph, regions, getPriceCost);
-    std::cout << "MetroDesigner inicializado." << std::endl;
+    std::unordered_map<std::string, std::string> result;
 
-    // Execute the metro excavation design
-    std::vector<Edge> excavationPlan = designer.escavacaoMetro();
+    findStations(cityGraph, result);
 
-    std::cout << "\nSegmentos selecionados para escavação:" << std::endl;
-    std::cout << "[";
-    // Output the selected edges for excavation
-    for (const auto& edge : excavationPlan) {
-        std::cout << "('"<< edge.from << "','" << edge.to << "'),";
+    // Print results
+    for (const auto& entry : result) {
+        std::cout << "Region: " << entry.first << ", Best Node: " << entry.second << std::endl;
     }
-    std::cout << "]" << std::endl;
-
-    std::cout << "Programa finalizado com sucesso." << std::endl;
     return 0;
 }
