@@ -43,7 +43,7 @@ int main() {
     std::cout << "[";
     // Output the selected edges for excavation
     for (const auto& edge : excavationPlan) {
-        std::cout << "("<< edge.from << "," << edge.to << "),";
+        std::cout << "('"<< edge.from << "','" << edge.to << "'),";
     }
     std::cout << "]" << std::endl;
 

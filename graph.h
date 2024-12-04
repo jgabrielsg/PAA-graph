@@ -40,8 +40,8 @@ struct Property {
 
 // Structure to represent a Region
 struct Region {
-    std::string name;               // Region name (e.g., "Region1")
-    std::vector<std::string> nodes; // Node IDs belonging to the region
+    std::string name;                // Region name (e.g., "Region1")
+    std::vector<std::string> nodes;  // Node IDs belonging to the region
 };
 
 // Graph class
@@ -57,6 +57,11 @@ public:
     
     // Added getter for regions
     const std::vector<Region>& getRegions() const;
+    
+    // New methods to add nodes, edges, and properties
+    void addNode(const Node& node);
+    void addEdge(const Edge& edge);
+    void addProperty(const Property& property);
     
     void printNodes() const;
     void printEdges() const;

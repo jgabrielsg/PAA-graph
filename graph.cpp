@@ -73,12 +73,6 @@ bool Graph::loadFromJson(const std::string& filename) {
     // Group nodes into regions
     groupNodesIntoRegions();
 
-    // Debug: Imprimir algumas arestas carregadas
-    std::cout << "Total de arestas carregadas: " << edges.size() << std::endl;
-    for (size_t i = 0; i < std::min(edges.size(), size_t(5)); ++i) { // Imprime as primeiras 5 arestas
-        std::cout << "Aresta " << i+1 << ": " << edges[i].from << " - " << edges[i].to << std::endl;
-    }
-
     return true;
 }
 
@@ -100,6 +94,19 @@ const std::vector<Region>& Graph::getRegions() const { return regions; }
 const std::vector<Node>& Graph::getNodes() const { return nodes; }
 const std::vector<Edge>& Graph::getEdges() const { return edges; }
 const std::vector<Property>& Graph::getProperties() const { return properties; }
+
+// New methods to add nodes, edges, and properties
+void Graph::addNode(const Node& node) {
+    nodes.push_back(node);
+}
+
+void Graph::addEdge(const Edge& edge) {
+    edges.push_back(edge);
+}
+
+void Graph::addProperty(const Property& property) {
+    properties.push_back(property);
+}
 
 // Print utility functions
 void Graph::printNodes() const {

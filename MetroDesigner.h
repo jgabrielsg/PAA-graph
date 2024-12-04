@@ -1,15 +1,14 @@
 #ifndef METRODESIGNER_H
 #define METRODESIGNER_H
 
-#include "Graph.h"
+#include "graph.h"
 #include <vector>
 #include <string>
 #include <unordered_map>
 #include <set>
 #include <functional>
 
-// Forward declare Region struct to avoid redefinition
-struct Region;
+// Estrutura Region já está definida em Graph.h, portanto não é necessário forward declare
 
 class MetroDesigner {
 public:
@@ -26,9 +25,17 @@ private:
 
     // Helper functions
     void cptDijkstraFast(const std::string& source, std::unordered_map<std::string, double>& distances, std::unordered_map<std::string, std::string>& parent);
-    std::vector<Edge> kruskalMST(const std::vector<Edge>& allEdges, const std::set<std::string>& stations);
+    
+    // Removed kruskalMST as it's no longer needed
 
-    // UnionFind class for Kruskal's algorithm
+    // Função para extrair as arestas conectando as estações selecionadas
+    std::vector<Edge> extractConnectingEdges(const std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& selectedStationsParents);
+
+    // Função auxiliar para criar um subgrafo com apenas as estações selecionadas e suas conexões
+    Graph createSubgraph(const std::set<std::string>& selectedStations, const std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& selectedStationsParents);
+
+    // UnionFind class for Kruskal's algorithm (Can be removed if not needed elsewhere)
+    /*
     class UnionFind {
     public:
         UnionFind(int numElements);
@@ -40,6 +47,7 @@ private:
         std::vector<int> parent;
         std::vector<int> rank;
     };
+    */
 };
 
 #endif // METRODESIGNER_H
