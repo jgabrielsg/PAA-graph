@@ -31,6 +31,7 @@ struct Edge {
     int num_comercial;
     int num_touristic;
     int num_industrial;
+    int bus_preference;
 };
 
 // Structure to represent a Property

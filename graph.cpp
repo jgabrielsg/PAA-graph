@@ -55,6 +55,7 @@ bool Graph::loadFromJson(const std::string& filename) {
             loadField(edge_json, "num_commercial", edge.num_comercial);
             loadField(edge_json, "num_touristic", edge.num_touristic);
             loadField(edge_json, "num_industrial", edge.num_industrial);
+            loadField(edge_json, "bus_preference", edge.bus_preference);
             
             edges.push_back(edge);
         }
