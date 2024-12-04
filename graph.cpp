@@ -153,8 +153,5 @@ std::unordered_map<std::string, double> Graph::getNeighbors(const std::string& n
         }
     }
 
-    std::cout << "Obtendo vizinhos para o nó " << nodeId << ": " 
-              << neighbors.size() << " vizinhos encontrados." << std::endl;
-
     return neighbors;
 }

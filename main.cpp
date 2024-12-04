@@ -6,8 +6,6 @@
 
 // Define the cost function (e.g., using 'price_cost' as excavation cost)
 double getPriceCost(const Edge& edge) {
-    std::cout << "Calculando custo para a aresta " << edge.from << "-" << edge.to 
-              << ": " << edge.price_cost << std::endl;
     return edge.price_cost;
 }
 
@@ -41,12 +39,13 @@ int main() {
     // Execute the metro excavation design
     std::vector<Edge> excavationPlan = designer.escavacaoMetro();
 
-    // Output the selected edges for excavation
     std::cout << "\nSegmentos selecionados para escavação:" << std::endl;
+    std::cout << "[";
+    // Output the selected edges for excavation
     for (const auto& edge : excavationPlan) {
-        std::cout << "De: " << edge.from << " Para: " << edge.to 
-                  << " Custo: " << edge.price_cost << std::endl;
+        std::cout << "("<< edge.from << "," << edge.to << "),";
     }
+    std::cout << "]" << std::endl;
 
     std::cout << "Programa finalizado com sucesso." << std::endl;
     return 0;

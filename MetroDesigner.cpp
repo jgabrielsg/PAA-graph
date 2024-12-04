@@ -119,7 +119,6 @@ std::vector<Edge> MetroDesigner::kruskalMST(const std::vector<Edge>& allEdges, c
         if (leader1 != leader2) {
             uf.unionE(leader1, leader2);
             mst.push_back(edge);
-            std::cout << "Aresta adicionada ao MST: " << edge.from << " - " << edge.to << " Custo: " << getCost(edge) << std::endl;
 
             // Verificar se as estações estão todas conectadas
             bool allConnected = true;
