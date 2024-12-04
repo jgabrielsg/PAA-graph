@@ -47,7 +47,7 @@ void loadGraphFromJson(const std::string& filename, Graph& graph) {
         vertex v2 = nodeMap[toNodeId];
 
         // Read edge properties
-        int cost = edge["price_cost"];  // Assuming 'price_cost' is the cost
+        int cost = edge["excavation_cost"];  // Assuming 'price_cost' is the cost
         int distance = edge["distance"];
 
         // Add the edge to the graph in both directions (undirected graph)
