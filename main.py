@@ -124,7 +124,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                         "num_residencial": 0,
                         "num_commercial": 0,
                         "num_touristic": 0,
-                        "num_industrial": 0
+                        "num_industrial": 0,
+                        "bus_preference": 0
                     }
 
                     # Aresta de caminhada na direção (neighbor_id -> node_id)
@@ -140,7 +141,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                         "num_residencial": 0,
                         "num_commercial": 0,
                         "num_touristic": 0,
-                        "num_industrial": 0
+                        "num_industrial": 0,
+                        "bus_preference": 0
                     }
 
                     # Aresta de táxi na direção (node_id -> neighbor_id)
@@ -156,7 +158,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                         "num_residencial": 0,
                         "num_commercial": 0,
                         "num_touristic": 0,
-                        "num_industrial": 0
+                        "num_industrial": 0,
+                        "bus_preference": 0
                     }
 
                     # Aresta de táxi na direção (neighbor_id -> node_id)
@@ -172,7 +175,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                         "num_residencial": 0,
                         "num_commercial": 0,
                         "num_touristic": 0,
-                        "num_industrial": 0
+                        "num_industrial": 0,
+                        "bus_preference": 0
                     }
 
 
@@ -198,21 +202,25 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                     edge_data_walk_1["num_commercial"] = c_count
                     edge_data_walk_1["num_touristic"] = t_count
                     edge_data_walk_1["num_industrial"] = i_count
+                    edge_data_walk_1["bus_preference"] = 4 * i_count + 2 * r_count
                     
                     edge_data_walk_2["num_residencial"] = r_count2
                     edge_data_walk_2["num_commercial"] = c_count2
                     edge_data_walk_2["num_touristic"] = t_count2
                     edge_data_walk_2["num_industrial"] = i_count2
+                    edge_data_walk_2["bus_preference"] = 4 * i_count2 + 2 * r_count2
                     
                     edge_data_taxi_1["num_residencial"] = r_count
                     edge_data_taxi_1["num_commercial"] = c_count
                     edge_data_taxi_1["num_touristic"] = t_count
                     edge_data_taxi_1["num_industrial"] = i_count
+                    edge_data_taxi_1["bus_preference"] = 4 * i_count + 2 * r_count
                     
                     edge_data_taxi_2["num_residencial"] = r_count2
                     edge_data_taxi_2["num_commercial"] = c_count2
                     edge_data_taxi_2["num_touristic"] = t_count2
                     edge_data_taxi_2["num_industrial"] = i_count2
+                    edge_data_taxi_2["bus_preference"] = 4 * i_count2 + 2 * r_count2
                     
                     graph["edges"].append(edge_data_walk_1)
                     graph["edges"].append(edge_data_walk_2)
@@ -246,7 +254,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                             "num_residencial": 0,
                             "num_commercial": 0,
                             "num_touristic": 0,
-                            "num_industrial": 0
+                            "num_industrial": 0,
+                            "bus_preference": 0
                         }
 
                         # Aresta de caminhada na direção (neighbor_id -> node_id)
@@ -262,7 +271,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                             "num_residencial": 0,
                             "num_commercial": 0,
                             "num_touristic": 0,
-                            "num_industrial": 0
+                            "num_industrial": 0,
+                            "bus_preference": 0
                         }
 
                         # Aresta de táxi na direção (node_id -> neighbor_id)
@@ -278,7 +288,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                             "num_residencial": 0,
                             "num_commercial": 0,
                             "num_touristic": 0,
-                            "num_industrial": 0
+                            "num_industrial": 0,
+                            "bus_preference": 0
                         }
 
                         # Aresta de táxi na direção (neighbor_id -> node_id)
@@ -294,7 +305,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                             "num_residencial": 0,
                             "num_commercial": 0,
                             "num_touristic": 0,
-                            "num_industrial": 0
+                            "num_industrial": 0,
+                            "bus_preference": 0
                         }
 
 
@@ -320,21 +332,25 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                         edge_data_walk_1["num_commercial"] = c_count
                         edge_data_walk_1["num_touristic"] = t_count
                         edge_data_walk_1["num_industrial"] = i_count
+                        edge_data_walk_1["bus_preference"] = 4 * i_count + 2 * r_count
                         
                         edge_data_walk_2["num_residencial"] = r_count2
                         edge_data_walk_2["num_commercial"] = c_count2
                         edge_data_walk_2["num_touristic"] = t_count2
                         edge_data_walk_2["num_industrial"] = i_count2
+                        edge_data_walk_2["bus_preference"] = 4 * i_count2 + 2 * r_count2
                         
                         edge_data_taxi_1["num_residencial"] = r_count
                         edge_data_taxi_1["num_commercial"] = c_count
                         edge_data_taxi_1["num_touristic"] = t_count
                         edge_data_taxi_1["num_industrial"] = i_count
+                        edge_data_taxi_1["bus_preference"] = 4 * i_count + 2 * r_count
                         
                         edge_data_taxi_2["num_residencial"] = r_count2
                         edge_data_taxi_2["num_commercial"] = c_count2
                         edge_data_taxi_2["num_touristic"] = t_count2
                         edge_data_taxi_2["num_industrial"] = i_count2
+                        edge_data_taxi_2["bus_preference"] = 4 * i_count2 + 2 * r_count2
                         
                         graph["edges"].append(edge_data_walk_1)
                         graph["edges"].append(edge_data_walk_2)
@@ -360,7 +376,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                     "num_residencial": 0,
                     "num_commercial": 0,
                     "num_touristic": 0,
-                    "num_industrial": 0
+                    "num_industrial": 0,
+                    "bus_preference": 0
                 }
 
                 # Aresta de caminhada na direção (neighbor_id -> node_id)
@@ -376,7 +393,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                     "num_residencial": 0,
                     "num_commercial": 0,
                     "num_touristic": 0,
-                    "num_industrial": 0
+                    "num_industrial": 0,
+                    "bus_preference": 0
                 }
 
                 # Aresta de táxi na direção (node_id -> neighbor_id)
@@ -392,7 +410,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                     "num_residencial": 0,
                     "num_commercial": 0,
                     "num_touristic": 0,
-                    "num_industrial": 0
+                    "num_industrial": 0,
+                    "bus_preference": 0
                 }
 
                 # Aresta de táxi na direção (neighbor_id -> node_id)
@@ -408,7 +427,8 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                     "num_residencial": 0,
                     "num_commercial": 0,
                     "num_touristic": 0,
-                    "num_industrial": 0
+                    "num_industrial": 0,
+                    "bus_preference": 0
                 }
 
 
@@ -434,21 +454,25 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                 edge_data_walk_1["num_commercial"] = c_count
                 edge_data_walk_1["num_touristic"] = t_count
                 edge_data_walk_1["num_industrial"] = i_count
+                edge_data_walk_1["bus_preference"] = 4 * i_count + 2 * r_count
                 
                 edge_data_walk_2["num_residencial"] = r_count2
                 edge_data_walk_2["num_commercial"] = c_count2
                 edge_data_walk_2["num_touristic"] = t_count2
                 edge_data_walk_2["num_industrial"] = i_count2
+                edge_data_walk_2["bus_preference"] = 4 * i_count2 + 2 * r_count2
                 
                 edge_data_taxi_1["num_residencial"] = r_count
                 edge_data_taxi_1["num_commercial"] = c_count
                 edge_data_taxi_1["num_touristic"] = t_count
                 edge_data_taxi_1["num_industrial"] = i_count
+                edge_data_taxi_1["bus_preference"] = 4 * i_count + 2 * r_count
                 
                 edge_data_taxi_2["num_residencial"] = r_count2
                 edge_data_taxi_2["num_commercial"] = c_count2
                 edge_data_taxi_2["num_touristic"] = t_count2
                 edge_data_taxi_2["num_industrial"] = i_count2
+                edge_data_taxi_2["bus_preference"] = 4 * i_count2 + 2 * r_count2
                 
                 graph["edges"].append(edge_data_walk_1)
                 graph["edges"].append(edge_data_walk_2)
