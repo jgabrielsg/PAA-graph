@@ -4,28 +4,30 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 # Função para gerar um imóvel com probabilidade aleatória para tipo
-def generate_property(graph, cep, street_name, node_from, node_to):
-    property_counter = 0
-    # Gerar imóveis para a rua
-    for side in ["left", "right"]:
-        for k in range(1, 6):
-            if side == "left":
-                number = property_counter
-            else:
-                number = property_counter + 5
-            property_types = ['residential', 'commercial', 'industrial', 'touristic']
-            property_type = random.choice(property_types)  # Escolhe aleatoriamente o tipo do imóvel
+def generate_property(graph, cep, street_name, node_from, node_to, weights, number, r_count, c_count, i_count, t_count):
+    property_types = ['residential', 'commercial', 'industrial', 'touristic']
+    # Escolher o tipo de imóvel com base nos pesos
+    property_type = random.choices(property_types, weights=weights, k=1)[0]  # k=1 retorna uma lista de um item, então pegamos o primeiro
+    
+    if property_type == "residential":
+        r_count += 1
+    if property_type == "commercial":
+        c_count += 1
+    if property_type == "industrial":
+        i_count += 1
+    if property_type == "touristic":
+        t_count += 1
 
-            graph['properties'].append( {
-                "cep": cep,
-                "street": street_name,
-                "number": number,
-                "type": property_type,
-                "from": node_from,
-                "to": node_to
-            })
+    graph['properties'].append( {
+        "cep": cep,
+        "street": street_name,
+        "number": number,
+        "type": property_type,
+        "from": node_from,
+        "to": node_to
+    })
 
-    return graph
+    return graph, r_count, c_count, i_count, t_count
 
 # Função principal para criar o grafo com propriedades e regiões, incluindo aleatoriedade nos vértices
 def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15, taxi_rate=4, non_motorized_speed=1.5):
@@ -81,11 +83,11 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
             else:
                 nodes_exist[(i, j)] = False  # Marca o nó como inexistente
 
-    # Gerando as arestas e imóveis somente entre nós existentes
-    property_counter = 1  # Contador de imóveis para manter a numeração contínua
 
     for i in range(N):
+        street_name_vertical = get_unique_street_name()
         for j in range(M):
+            street_name = get_unique_street_name()
             if not nodes_exist.get((i, j)):
                 continue  # Pula se o nó não existir
 
@@ -102,174 +104,356 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                 else:
                     cep = "53000"  # Região 3
 
-            # Arestas horizontais
+            # Arestas verticais
             if j + 1 < M:
                 if nodes_exist.get((i, j + 1)):
                     neighbor_id = f"node_{i}_{j+1}"
-                    street_name = get_unique_street_name()
 
                     # Gerar arestas bidirecionais
-                    for direction in [(node_id, neighbor_id), (neighbor_id, node_id)]:
-                        # Caminhada
-                        edge_data_walk = {
-                            "from": direction[0],
-                            "to": direction[1],
-                            "transport_type": "walk",
-                            "max_speed": non_motorized_speed,
-                            "distance": street_length,
-                            "price_cost": 0,
-                            "time_cost": street_length / non_motorized_speed
-                        }
-                        graph["edges"].append(edge_data_walk)
-                        
-                        edge_data_walk2 = {
-                            "from": direction[0],
-                            "to": direction[1],
-                            "transport_type": "walk",
-                            "max_speed": non_motorized_speed,
-                            "distance": street_length,
-                            "price_cost": 0,
-                            "time_cost": street_length / non_motorized_speed
-                        }
-                        graph["edges"].append(edge_data_walk2)
+                    mult_rand = random.choice([0.6, 0.8, 1, 1.2, 1.4])
+                    # Aresta de caminhada na direção (node_id -> neighbor_id)
+                    edge_data_walk_1 = {
+                        "from": node_id,
+                        "to": neighbor_id,
+                        "transport_type": "walk",
+                        "max_speed": non_motorized_speed,
+                        "distance": street_length,
+                        "price_cost": 0,
+                        "time_cost": street_length / non_motorized_speed,
+                        "excavation_cost": street_length * mult_rand,
+                        "num_residencial": 0,
+                        "num_commercial": 0,
+                        "num_touristic": 0,
+                        "num_industrial": 0
+                    }
 
-                        # Táxi
-                        edge_data_taxi = {
-                            "from": direction[0],
-                            "to": direction[1],
-                            "transport_type": "taxi",
-                            "max_speed": max_speed,
-                            "distance": street_length,
-                            "price_cost": (street_length / 1000) * taxi_rate,
-                            "time_cost": street_length / max_speed
-                        }
-                        graph["edges"].append(edge_data_taxi)
-                        
-                        edge_data_taxi2 = {
-                            "from": direction[1],
-                            "to": direction[0],
-                            "transport_type": "taxi",
-                            "max_speed": max_speed,
-                            "distance": street_length,
-                            "price_cost": (street_length / 1000) * taxi_rate,
-                            "time_cost": street_length / max_speed
-                        }
-                        graph["edges"].append(edge_data_taxi2)
+                    # Aresta de caminhada na direção (neighbor_id -> node_id)
+                    edge_data_walk_2 = {
+                        "from": neighbor_id,
+                        "to": node_id,
+                        "transport_type": "walk",
+                        "max_speed": non_motorized_speed,
+                        "distance": street_length,
+                        "price_cost": 0,
+                        "time_cost": street_length / non_motorized_speed,
+                        "excavation_cost": street_length * mult_rand,
+                        "num_residencial": 0,
+                        "num_commercial": 0,
+                        "num_touristic": 0,
+                        "num_industrial": 0
+                    }
+
+                    # Aresta de táxi na direção (node_id -> neighbor_id)
+                    edge_data_taxi_1 = {
+                        "from": node_id,
+                        "to": neighbor_id,
+                        "transport_type": "taxi",
+                        "max_speed": max_speed,
+                        "distance": street_length,
+                        "price_cost": (street_length / 1000) * taxi_rate,
+                        "time_cost": street_length / max_speed,
+                        "excavation_cost": street_length * mult_rand,
+                        "num_residencial": 0,
+                        "num_commercial": 0,
+                        "num_touristic": 0,
+                        "num_industrial": 0
+                    }
+
+                    # Aresta de táxi na direção (neighbor_id -> node_id)
+                    edge_data_taxi_2 = {
+                        "from": neighbor_id,
+                        "to": node_id,
+                        "transport_type": "taxi",
+                        "max_speed": max_speed,
+                        "distance": street_length,
+                        "price_cost": (street_length / 1000) * taxi_rate,
+                        "time_cost": street_length / max_speed,
+                        "excavation_cost": street_length * mult_rand,
+                        "num_residencial": 0,
+                        "num_commercial": 0,
+                        "num_touristic": 0,
+                        "num_industrial": 0
+                    }
+
+
+                    if cep == "51000":
+                        weights = [0.9, 0.05, 0.04, 0.01]   # Região 1 é mais residencial
+                    elif cep == "52000":
+                        weights = [0.60, 0.35, 0.01, 0.04]  # Região 2 é mais comercial e com atrações
+                    elif cep == "53000":
+                        weights = [0.25, 0.05, 0.69, 0.01]  # Região 3 mais industrial
+                    elif cep == "54000":
+                        weights = [0.9, 0.05, 0.04, 0.01]   # Região 4 é mais residencial
+                    
+                    r_count, c_count, i_count, t_count = 0, 0, 0, 0
+                    r_count2, c_count2, i_count2, t_count2 = 0, 0, 0, 0
+                    # Gerar 5 propriedades para a aresta
+                    for k in range(5):
+                        # Propriedades do lado "de"
+                        graph, r_count, c_count, i_count, t_count = generate_property(graph, cep, street_name_vertical, node_id, neighbor_id, weights, 10*j + 2*k, r_count, c_count, i_count, t_count)
+                        # Propriedades do lado "para"
+                        graph, r_count2, c_count2, i_count2, t_count2 = generate_property(graph, cep, street_name_vertical, neighbor_id, node_id, weights, 10*j + 2*k + 1, r_count2, c_count2, i_count2, t_count2)
+                    
+                    edge_data_walk_1["num_residencial"] = r_count
+                    edge_data_walk_1["num_commercial"] = c_count
+                    edge_data_walk_1["num_touristic"] = t_count
+                    edge_data_walk_1["num_industrial"] = i_count
+                    
+                    edge_data_walk_2["num_residencial"] = r_count2
+                    edge_data_walk_2["num_commercial"] = c_count2
+                    edge_data_walk_2["num_touristic"] = t_count2
+                    edge_data_walk_2["num_industrial"] = i_count2
+                    
+                    edge_data_taxi_1["num_residencial"] = r_count
+                    edge_data_taxi_1["num_commercial"] = c_count
+                    edge_data_taxi_1["num_touristic"] = t_count
+                    edge_data_taxi_1["num_industrial"] = i_count
+                    
+                    edge_data_taxi_2["num_residencial"] = r_count2
+                    edge_data_taxi_2["num_commercial"] = c_count2
+                    edge_data_taxi_2["num_touristic"] = t_count2
+                    edge_data_taxi_2["num_industrial"] = i_count2
+                    
+                    graph["edges"].append(edge_data_walk_1)
+                    graph["edges"].append(edge_data_walk_2)
+                    graph["edges"].append(edge_data_taxi_1)
+                    graph["edges"].append(edge_data_taxi_2)
+
                 else:
-                    # Caso o vértice (i, j+1) tenha sido pulado
-                    # Conectar ao vértice mais próximo à esquerda
+                    # Caso o vértice (i, j+1) tenha sido pulado conectar ao vértice mais próximo para cima
                     k = j + 1
                     while k < M and not nodes_exist.get((i, k)):
                         k += 1
                     if k < M:
                         neighbor_id = f"node_{i}_{k}"
-                        street_name = get_unique_street_name()
-
+                        
                         # Calcular a distância considerando os vértices pulados
                         skipped_vertices = k - j - 1
                         distance = street_length * (skipped_vertices + 1)
 
-                        # Gerar aresta entre o vértice atual e o mais próximo à esquerda
-                        edge_data_walk = {
+                        # Gerar arestas bidirecionais
+                        mult_rand = random.choice([0.6, 0.8, 1, 1.2, 1.4])
+                        # Aresta de caminhada na direção (node_id -> neighbor_id)
+                        edge_data_walk_1 = {
                             "from": node_id,
                             "to": neighbor_id,
                             "transport_type": "walk",
                             "max_speed": non_motorized_speed,
                             "distance": distance,
                             "price_cost": 0,
-                            "time_cost": distance / non_motorized_speed
+                            "time_cost": distance / non_motorized_speed,
+                            "excavation_cost": distance * mult_rand,
+                            "num_residencial": 0,
+                            "num_commercial": 0,
+                            "num_touristic": 0,
+                            "num_industrial": 0
                         }
-                        graph["edges"].append(edge_data_walk)
-                        
-                        edge_data_walk2 = {
+
+                        # Aresta de caminhada na direção (neighbor_id -> node_id)
+                        edge_data_walk_2 = {
                             "from": neighbor_id,
                             "to": node_id,
                             "transport_type": "walk",
                             "max_speed": non_motorized_speed,
                             "distance": distance,
                             "price_cost": 0,
-                            "time_cost": distance / non_motorized_speed
+                            "time_cost": distance / non_motorized_speed,
+                            "excavation_cost": distance * mult_rand,
+                            "num_residencial": 0,
+                            "num_commercial": 0,
+                            "num_touristic": 0,
+                            "num_industrial": 0
                         }
-                        graph["edges"].append(edge_data_walk2)
 
-                        edge_data_taxi = {
+                        # Aresta de táxi na direção (node_id -> neighbor_id)
+                        edge_data_taxi_1 = {
                             "from": node_id,
                             "to": neighbor_id,
                             "transport_type": "taxi",
                             "max_speed": max_speed,
                             "distance": distance,
                             "price_cost": (distance / 1000) * taxi_rate,
-                            "time_cost": distance / max_speed
+                            "time_cost": distance / max_speed,
+                            "excavation_cost": distance * mult_rand,
+                            "num_residencial": 0,
+                            "num_commercial": 0,
+                            "num_touristic": 0,
+                            "num_industrial": 0
                         }
-                        graph["edges"].append(edge_data_taxi)
-                        
-                        edge_data_taxi2 = {
+
+                        # Aresta de táxi na direção (neighbor_id -> node_id)
+                        edge_data_taxi_2 = {
                             "from": neighbor_id,
                             "to": node_id,
                             "transport_type": "taxi",
                             "max_speed": max_speed,
                             "distance": distance,
                             "price_cost": (distance / 1000) * taxi_rate,
-                            "time_cost": distance / max_speed
+                            "time_cost": distance / max_speed,
+                            "excavation_cost": distance * mult_rand,
+                            "num_residencial": 0,
+                            "num_commercial": 0,
+                            "num_touristic": 0,
+                            "num_industrial": 0
                         }
-                        graph["edges"].append(edge_data_taxi2)
 
-                        graph = generate_property(graph, cep, street_name, direction[1], direction[0])
 
-            # Arestas verticais
-            if i + 1 < N and nodes_exist.get((i + 1, j)):
+                        if cep == "51000":
+                            weights = [0.9, 0.05, 0.04, 0.01]   # Região 1 é mais residencial
+                        elif cep == "52000":
+                            weights = [0.60, 0.35, 0.01, 0.04]  # Região 2 é mais comercial e com atrações
+                        elif cep == "53000":
+                            weights = [0.25, 0.05, 0.69, 0.01]  # Região 3 mais industrial
+                        elif cep == "54000":
+                            weights = [0.9, 0.05, 0.04, 0.01]   # Região 4 é mais residencial
+                        
+                        r_count, c_count, i_count, t_count = 0, 0, 0, 0
+                        r_count2, c_count2, i_count2, t_count2 = 0, 0, 0, 0
+                        # Gerar 5 propriedades para a aresta
+                        for k in range(5):
+                            # Propriedades do lado "de"
+                            graph, r_count, c_count, i_count, t_count = generate_property(graph, cep, street_name_vertical, node_id, neighbor_id, weights, 10*j + 2*k, r_count, c_count, i_count, t_count)
+                            # Propriedades do lado "para"
+                            graph, r_count2, c_count2, i_count2, t_count2 = generate_property(graph, cep, street_name_vertical, neighbor_id, node_id, weights, 10*j + 2*k + 1, r_count2, c_count2, i_count2, t_count2)
+                        
+                        edge_data_walk_1["num_residencial"] = r_count
+                        edge_data_walk_1["num_commercial"] = c_count
+                        edge_data_walk_1["num_touristic"] = t_count
+                        edge_data_walk_1["num_industrial"] = i_count
+                        
+                        edge_data_walk_2["num_residencial"] = r_count2
+                        edge_data_walk_2["num_commercial"] = c_count2
+                        edge_data_walk_2["num_touristic"] = t_count2
+                        edge_data_walk_2["num_industrial"] = i_count2
+                        
+                        edge_data_taxi_1["num_residencial"] = r_count
+                        edge_data_taxi_1["num_commercial"] = c_count
+                        edge_data_taxi_1["num_touristic"] = t_count
+                        edge_data_taxi_1["num_industrial"] = i_count
+                        
+                        edge_data_taxi_2["num_residencial"] = r_count2
+                        edge_data_taxi_2["num_commercial"] = c_count2
+                        edge_data_taxi_2["num_touristic"] = t_count2
+                        edge_data_taxi_2["num_industrial"] = i_count2
+                        
+                        graph["edges"].append(edge_data_walk_1)
+                        graph["edges"].append(edge_data_walk_2)
+                        graph["edges"].append(edge_data_taxi_1)
+                        graph["edges"].append(edge_data_taxi_2)
+
+            # Arestas horizontais
+            if i + 1 < N and nodes_exist.get((i + 1, j)):  # Só cria se tiver uma ao lado
                 neighbor_id = f"node_{i+1}_{j}"
-                street_name = get_unique_street_name()
 
                 # Gerar arestas bidirecionais
-                for direction in [(node_id, neighbor_id), (neighbor_id, node_id)]:
-                    # Caminhada
-                    edge_data_walk = {
-                        "from": direction[0],
-                        "to": direction[1],
-                        "transport_type": "walk",
-                        "max_speed": non_motorized_speed,
-                        "distance": street_length,
-                        "price_cost": 0,
-                        "time_cost": street_length / non_motorized_speed
-                    }
-                    graph["edges"].append(edge_data_walk)
-                    
-                    edge_data_walk2 = {
-                        "from": direction[1],
-                        "to": direction[0],
-                        "transport_type": "walk",
-                        "max_speed": non_motorized_speed,
-                        "distance": street_length,
-                        "price_cost": 0,
-                        "time_cost": street_length / non_motorized_speed
-                    }
-                    graph["edges"].append(edge_data_walk2)
+                mult_rand = random.choice([0.6, 0.8, 1, 1.2, 1.4])
+                # Aresta de caminhada na direção (node_id -> neighbor_id)
+                edge_data_walk_1 = {
+                    "from": node_id,
+                    "to": neighbor_id,
+                    "transport_type": "walk",
+                    "max_speed": non_motorized_speed,
+                    "distance": street_length,
+                    "price_cost": 0,
+                    "time_cost": street_length / non_motorized_speed,
+                    "excavation_cost": street_length * mult_rand,
+                    "num_residencial": 0,
+                    "num_commercial": 0,
+                    "num_touristic": 0,
+                    "num_industrial": 0
+                }
 
-                    # Táxi
-                    edge_data_taxi = {
-                        "from": direction[0],
-                        "to": direction[1],
-                        "transport_type": "taxi",
-                        "max_speed": max_speed,
-                        "distance": street_length,
-                        "price_cost": (street_length / 1000) * taxi_rate,
-                        "time_cost": street_length / max_speed
-                    }
-                    graph["edges"].append(edge_data_taxi)
-                    
-                    edge_data_taxi2 = {
-                        "from": direction[1],
-                        "to": direction[0],
-                        "transport_type": "taxi",
-                        "max_speed": max_speed,
-                        "distance": street_length,
-                        "price_cost": (street_length / 1000) * taxi_rate,
-                        "time_cost": street_length / max_speed
-                    }
-                    graph["edges"].append(edge_data_taxi2)
+                # Aresta de caminhada na direção (neighbor_id -> node_id)
+                edge_data_walk_2 = {
+                    "from": neighbor_id,
+                    "to": node_id,
+                    "transport_type": "walk",
+                    "max_speed": non_motorized_speed,
+                    "distance": street_length,
+                    "price_cost": 0,
+                    "time_cost": street_length / non_motorized_speed,
+                    "excavation_cost": street_length * mult_rand,
+                    "num_residencial": 0,
+                    "num_commercial": 0,
+                    "num_touristic": 0,
+                    "num_industrial": 0
+                }
 
-                    graph = generate_property(graph, cep, street_name, direction[1], direction[0])
+                # Aresta de táxi na direção (node_id -> neighbor_id)
+                edge_data_taxi_1 = {
+                    "from": node_id,
+                    "to": neighbor_id,
+                    "transport_type": "taxi",
+                    "max_speed": max_speed,
+                    "distance": street_length,
+                    "price_cost": (street_length / 1000) * taxi_rate,
+                    "time_cost": street_length / max_speed,
+                    "excavation_cost": street_length * mult_rand,
+                    "num_residencial": 0,
+                    "num_commercial": 0,
+                    "num_touristic": 0,
+                    "num_industrial": 0
+                }
+
+                # Aresta de táxi na direção (neighbor_id -> node_id)
+                edge_data_taxi_2 = {
+                    "from": neighbor_id,
+                    "to": node_id,
+                    "transport_type": "taxi",
+                    "max_speed": max_speed,
+                    "distance": street_length,
+                    "price_cost": (street_length / 1000) * taxi_rate,
+                    "time_cost": street_length / max_speed,
+                    "excavation_cost": street_length * mult_rand,
+                    "num_residencial": 0,
+                    "num_commercial": 0,
+                    "num_touristic": 0,
+                    "num_industrial": 0
+                }
+
+
+                if cep == "51000":
+                    weights = [0.9, 0.05, 0.04, 0.01]   # Região 1 é mais residencial
+                elif cep == "52000":
+                    weights = [0.60, 0.35, 0.01, 0.04]  # Região 2 é mais comercial e com atrações
+                elif cep == "53000":
+                    weights = [0.25, 0.05, 0.69, 0.01]  # Região 3 mais industrial
+                elif cep == "54000":
+                    weights = [0.9, 0.05, 0.04, 0.01]   # Região 4 é mais residencial
+                
+                r_count, c_count, i_count, t_count = 0, 0, 0, 0
+                r_count2, c_count2, i_count2, t_count2 = 0, 0, 0, 0
+                # Gerar 5 propriedades para a aresta
+                for k in range(5):
+                    # Propriedades do lado "de"
+                    graph, r_count, c_count, i_count, t_count = generate_property(graph, cep, street_name_vertical, node_id, neighbor_id, weights, 10*j + 2*k, r_count, c_count, i_count, t_count)
+                    # Propriedades do lado "para"
+                    graph, r_count2, c_count2, i_count2, t_count2 = generate_property(graph, cep, street_name_vertical, neighbor_id, node_id, weights, 10*j + 2*k + 1, r_count2, c_count2, i_count2, t_count2)
+                
+                edge_data_walk_1["num_residencial"] = r_count
+                edge_data_walk_1["num_commercial"] = c_count
+                edge_data_walk_1["num_touristic"] = t_count
+                edge_data_walk_1["num_industrial"] = i_count
+                
+                edge_data_walk_2["num_residencial"] = r_count2
+                edge_data_walk_2["num_commercial"] = c_count2
+                edge_data_walk_2["num_touristic"] = t_count2
+                edge_data_walk_2["num_industrial"] = i_count2
+                
+                edge_data_taxi_1["num_residencial"] = r_count
+                edge_data_taxi_1["num_commercial"] = c_count
+                edge_data_taxi_1["num_touristic"] = t_count
+                edge_data_taxi_1["num_industrial"] = i_count
+                
+                edge_data_taxi_2["num_residencial"] = r_count2
+                edge_data_taxi_2["num_commercial"] = c_count2
+                edge_data_taxi_2["num_touristic"] = t_count2
+                edge_data_taxi_2["num_industrial"] = i_count2
+                
+                graph["edges"].append(edge_data_walk_1)
+                graph["edges"].append(edge_data_walk_2)
+                graph["edges"].append(edge_data_taxi_1)
+                graph["edges"].append(edge_data_taxi_2)
 
     # Salvar o grafo em JSON
     with open('city_graph.json', 'w', encoding='utf-8') as f:
@@ -312,7 +496,7 @@ def plot_graph(G, node_colors):
     plt.figure(figsize=(10, 10))
     nx.draw(
         G, pos, with_labels=True, node_size=100, node_color=node_colors,
-        font_size=4, font_weight='bold'
+        font_size=6, font_weight='bold'
     )
     plt.title("City Graph - Nós Coloridos por Região")
     plt.show()
