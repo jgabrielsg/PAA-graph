@@ -14,7 +14,7 @@ struct Node {
     std::string id;
     std::pair<int, int> location;
     std::vector<std::string> transport_options;
-    std::string region; // Added region attribute
+    int region; // Added region attribute
 };
 
 // Structure to represent an Edge

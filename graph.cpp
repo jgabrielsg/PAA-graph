@@ -8,8 +8,13 @@ Graph::Graph() {}
 // Helper function to load a field from JSON
 template<typename T>
 void loadField(const json& j, const std::string& key, T& field) {
-    field = j[key].get<T>();
+    if (j.contains(key)) {
+        field = j[key].get<T>();
+    } else {
+        std::cerr << "Warning: Key '" << key << "' not found in the JSON!" << std::endl;
+    }
 }
+
 
 // Function to load graph from JSON
 bool Graph::loadFromJson(const std::string& filename) {
@@ -144,6 +149,7 @@ void Graph::printEdges() const {
                   << ", Num. Comercial: " << edge.num_comercial
                   << ", Num. Touristic: " << edge.num_touristic
                   << ", Num. Industrial: " << edge.num_industrial
+                  << ", Bus preference: " << edge.bus_preference
 
                   << std::endl;
     }
