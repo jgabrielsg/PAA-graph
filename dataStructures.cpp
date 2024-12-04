@@ -1,46 +1,54 @@
 #include "dataStructures.h"
+#include <functional>  // Required for std::greater<>
 
-void Heap::insert_or_update(int distance, int vertex) {
-    heap.push_back({distance, vertex});
-    buildHeap();  // Rebuild heap after insertion
+
+void Heap::heapify(int index, int size) {
+    int left = 2 * index + 1;
+    int right = 2 * index + 2;
+    int smallest = index;
+
+    if (left < size && heap[left].first < heap[smallest].first) {
+        smallest = left;
+    }
+    if (right < size && heap[right].first < heap[smallest].first) {
+        smallest = right;
+    }
+
+    if (smallest != index) {
+        swap(index, smallest);
+        heapify(smallest, size);
+    }
 }
 
-bool Heap::empty() const {
-    return heap.empty();
+void Heap::swap(int i, int j) {
+    std::pair<int, vertex> temp = heap[i];
+    heap[i] = heap[j];
+    heap[j] = temp;
 }
 
-std::pair<int, int> Heap::top() const {
-    return heap.front();  // The first element is always the minimum
+void Heap::insert_or_update(int dist, vertex v) {
+    // Try to find if the vertex is already in the heap
+    for (int i = 0; i < heap.size(); ++i) {
+        if (heap[i].second == v) {
+            // If found, update the distance
+            if (dist < heap[i].first) {
+                heap[i].first = dist;
+                // Re-heapify to maintain heap property
+                heapify(i, heap.size());
+            }
+            return;
+        }
+    }
+    // If not found, insert the new vertex-distance pair
+    heap.push_back({dist, v});
+    std::push_heap(heap.begin(), heap.end(), std::greater<>()); // Min-heap based on distance
 }
 
 void Heap::pop() {
-    if (!empty()) {
-        std::swap(heap.front(), heap.back());
-        heap.pop_back();
-        heapify(0);  // Rebuild heap after pop
-    }
+    std::pop_heap(heap.begin(), heap.end(), std::greater<>());
+    heap.pop_back();
 }
 
-void Heap::buildHeap() {
-    for (int i = (heap.size() / 2 - 1); i >= 0; i--) {
-        heapify(i);
-    }
-}
-
-void Heap::heapify(int i) {
-    int n = heap.size();
-    int inx = i;
-    int leftInx = 2 * i + 1;
-    int rightInx = 2 * i + 2;
-
-    if (leftInx < n && heap[leftInx].first < heap[inx].first) {
-        inx = leftInx;
-    }
-    if (rightInx < n && heap[rightInx].first < heap[inx].first) {
-        inx = rightInx;
-    }
-    if (inx != i) {
-        std::swap(heap[i], heap[inx]);
-        heapify(inx);
-    }
+std::pair<int, vertex> Heap::top() const {
+    return heap.front();
 }
