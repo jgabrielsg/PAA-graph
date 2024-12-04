@@ -26,6 +26,11 @@ struct Edge {
     double distance;
     double price_cost;
     double time_cost;
+    double excavation_cost;
+    int num_residencial;
+    int num_comercial;
+    int num_touristic;
+    int num_industrial;
 };
 
 // Structure to represent a Property

@@ -50,6 +50,12 @@ bool Graph::loadFromJson(const std::string& filename) {
             loadField(edge_json, "distance", edge.distance);
             loadField(edge_json, "price_cost", edge.price_cost);
             loadField(edge_json, "time_cost", edge.time_cost);
+            loadField(edge_json, "excavation_cost", edge.excavation_cost);
+            loadField(edge_json, "num_residencial", edge.num_residencial);
+            loadField(edge_json, "num_commercial", edge.num_comercial);
+            loadField(edge_json, "num_touristic", edge.num_touristic);
+            loadField(edge_json, "num_industrial", edge.num_industrial);
+            
             edges.push_back(edge);
         }
     }
@@ -132,6 +138,12 @@ void Graph::printEdges() const {
                   << ", Distance: " << edge.distance
                   << ", Price Cost: " << edge.price_cost
                   << ", Time Cost: " << edge.time_cost
+                  << ", Excavation Cost: " << edge.excavation_cost
+                  << ", Num. Residencial: " << edge.num_residencial
+                  << ", Num. Comercial: " << edge.num_comercial
+                  << ", Num. Touristic: " << edge.num_touristic
+                  << ", Num. Industrial: " << edge.num_industrial
+
                   << std::endl;
     }
 }
