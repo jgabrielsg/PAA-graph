@@ -1,5 +1,9 @@
 #include "newMetro.h"
 #include <climits>
+#include <vector>
+#include <algorithm>
+#include "Graph.h"
+#include <limits.h>
 
 void Dijkstra::cptDijkstraFast(vertex v0, vertex* parent, int* distance, Graph& graph) {
     std::vector<bool> checked(graph.getNumVertices(), false);
@@ -75,4 +79,64 @@ void Kruskal::mstKruskalFast(std::vector<Edge*>& mstEdges, Graph& graph) {
             std::cout << "Edge added to MST: (" << edge.v1() << ", " << edge.v2() << ") with cost " << edge.cost() << std::endl;
         }
     }
+}
+
+std::vector<Edge*> escavacaoMetro(Graph& graph, const std::vector<std::vector<vertex>>& regioes) {
+    std::vector<vertex> estacoes;
+    std::vector<Edge*> solucao;  
+    int numVertices = graph.getNumVertices();
+
+    for (const auto& regiao : regioes) {
+        int minMaxDist = INT_MAX;
+        vertex c_min = -1;
+
+        for (vertex v : regiao) {
+            std::vector<int> distancia(numVertices, INT_MAX); 
+            std::vector<vertex> parent(numVertices, -1);      
+            
+            Dijkstra::cptDijkstraFast(v, parent.data(), distancia.data(), graph);
+
+            int maxDist = 0;
+            for (vertex r : regiao) {
+                maxDist = std::max(maxDist, distancia[r]);
+            }
+
+            if (maxDist < minMaxDist) {
+                minMaxDist = maxDist;
+                c_min = v;
+            }
+        }
+
+        estacoes.push_back(c_min);
+        std::cout << "estacoes: " << c_min << std::endl;
+    }
+
+    // construindo um subgrafo
+    Graph subgrafo(numVertices);
+    for (vertex v1 : estacoes) {
+        Edge* edge = graph.getEdges(v1);
+        while (edge) {
+            vertex v2 = edge->otherVertex(v1);
+            if (std::find(estacoes.begin(), estacoes.end(), v2) != estacoes.end()) {
+                subgrafo.addEdge(v1, v2, edge->cost(), edge->distance());
+            }
+            edge = edge->next();
+        }
+    }
+
+    std::vector<Edge*> arestasOrdenadas;
+    for (vertex v : estacoes) {
+        Edge* edge = subgrafo.getEdges(v);
+        while (edge) {
+            arestasOrdenadas.push_back(edge);
+            edge = edge->next();
+        }
+    }
+    std::sort(arestasOrdenadas.begin(), arestasOrdenadas.end(), [](Edge* e1, Edge* e2) {
+        return e1->cost() < e2->cost();
+    });
+
+    Kruskal::mstKruskalFast(solucao, subgrafo);
+
+    return solucao;
 }
