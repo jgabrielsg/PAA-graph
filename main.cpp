@@ -34,11 +34,11 @@ void loadGraphFromJson(const std::string& filename, Graph& graph) {
         vertex v1 = nodeMap[edge["from"]];
         vertex v2 = nodeMap[edge["to"]];
         int cost = edge["price_cost"];  // Ensure we're using 'price_cost' here
-        graph.addEdge(v1, v2, cost);  // Assuming the Graph class handles edge addition with 'cost'
+        int distance = edge["distance"];
+        graph.addEdge(v1, v2, cost, distance);  // Assuming the Graph class handles edge addition with 'cost'
     }
 }
 
-// Main function to test the graph reading and algorithms
 int main() {
     const std::string filename = "city_graph.json";
     int numVertices = 10;  // Replace with the actual number of nodes in your graph

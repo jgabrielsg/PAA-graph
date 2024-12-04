@@ -21,15 +21,18 @@ void Dijkstra::cptDijkstraFast(vertex v0, vertex* parent, int* distance, Graph& 
         
         if (distance[v1] == INT_MAX) { break; } // Exit if remaining vertices are unreachable
         
+        std::cout << "Processing vertex " << v1 << " with distance " << distance[v1] << std::endl;
+
         // Iterate through all edges connected to v1
         Edge* edge = graph.getEdges(v1); // Access edges from the Graph
         while (edge) {
             vertex v2 = edge->otherVertex(v1); // Get the other vertex of the edge
+            std::cout << "Checking edge (" << v1 << ", " << v2 << ") with distance " << edge->distance() << std::endl;
             if (!checked[v2]) {
-                int cost = edge->cost(); // Get the cost from the edge
-                if (distance[v1] + cost < distance[v2]) {
+                int current_distance = edge->distance(); // Get the cost from the edge
+                if (distance[v1] + current_distance < distance[v2]) {
                     parent[v2] = v1;
-                    distance[v2] = distance[v1] + cost;
+                    distance[v2] = distance[v1] + current_distance;
                     heap.insert_or_update(distance[v2], v2); // Update heap with new distance
                 }
             }
@@ -48,7 +51,7 @@ void Kruskal::mstKruskalFast(std::vector<Edge*>& mstEdges, Graph& graph) {
         while (edge) {
             vertex v2 = edge->otherVertex(v1);
             if (v1 < v2) { // Avoid duplicate edges (v1 < v2 ensures each edge is considered once)
-                edges.push_back(Edge(v1, v2, edge->cost())); // Create edge and store it
+                edges.push_back(Edge(v1, v2, edge->cost(), edge->distance())); // Create edge and store it
             }
             edge = edge->next(); // Move to next edge
         }
@@ -68,8 +71,8 @@ void Kruskal::mstKruskalFast(std::vector<Edge*>& mstEdges, Graph& graph) {
         vertex leaderV2 = uf.findE(edge.v2());
         if (leaderV1 != leaderV2) {
             uf.unionE(leaderV1, leaderV2); // Union the sets
-            mstEdges.push_back(new Edge(edge.v1(), edge.v2(), edge.cost())); // Add edge to MST
+            mstEdges.push_back(new Edge(edge.v1(), edge.v2(), edge.cost(), edge.distance(), nullptr));
+            std::cout << "Edge added to MST: (" << edge.v1() << ", " << edge.v2() << ") with cost " << edge.cost() << std::endl;
         }
     }
 }
-

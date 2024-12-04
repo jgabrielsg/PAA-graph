@@ -19,9 +19,9 @@ Graph::~Graph() {
     }
 }
 
-void Graph::addEdge(vertex v1, vertex v2, int cost) {
+void Graph::addEdge(vertex v1, vertex v2, int cost, int distance) {
     if (!hasEdge(v1, v2)) {
-        m_edges[v1] = new Edge(v1, v2, cost, m_edges[v1]);
+        m_edges[v1] = new Edge(v1, v2, cost, distance, m_edges[v1]);
         m_numEdges++;
     }
 }
@@ -89,9 +89,10 @@ void Graph::loadFromJSON(const std::string& filename) {
     for (const auto& edge : edges) {
         vertex v1 = nodeMap[edge["from"]];
         vertex v2 = nodeMap[edge["to"]];
-        int cost = edge["cost"];  // Extract the cost from the JSON object
-        addEdge(v1, v2, cost);   // Add edge from v1 to v2
-        addEdge(v2, v1, cost);   // Add edge from v2 to v1 (since the graph is undirected)
+        int cost = edge["cost"]; 
+        int distance = edge["distance"]; // Extract the cost from the JSON object
+        addEdge(v1, v2, cost, distance);   // Add edge from v1 to v2
+        addEdge(v2, v1, cost, distance);   // Add edge from v2 to v1 (since the graph is undirected)
     }
 
 }

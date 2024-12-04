@@ -34,7 +34,7 @@ void Heap::insert_or_update(int dist, vertex v) {
             if (dist < heap[i].first) {
                 heap[i].first = dist;
                 // Re-heapify to maintain heap property
-                heapify(i, heap.size());
+                std::make_heap(heap.begin(), heap.end(), std::greater<>());  // Re-heapify
             }
             return;
         }
@@ -43,6 +43,7 @@ void Heap::insert_or_update(int dist, vertex v) {
     heap.push_back({dist, v});
     std::push_heap(heap.begin(), heap.end(), std::greater<>()); // Min-heap based on distance
 }
+
 
 void Heap::pop() {
     std::pop_heap(heap.begin(), heap.end(), std::greater<>());
