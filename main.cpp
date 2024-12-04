@@ -1,62 +1,51 @@
-#include "graph.h"
-#include "newMetro.h"
-#include "dataStructures.h"
 #include <iostream>
-#include <vector>
-#include <string>
+#include <fstream>
+#include "external/json.hpp"
+#include "Graph.h"
 
-double getPriceCost(const Edge& edge) {
-    return edge.price_cost;
+using json = nlohmann::json;
+
+// Function to load the graph from the JSON file
+void loadGraphFromJson(const std::string& filename, GraphAdjList& graph) {
+    // Open the JSON file
+    std::ifstream inputFile(filename);
+    if (!inputFile) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return;
+    }
+
+    json j;
+    inputFile >> j;
+
+    // Create a map for node IDs to vertex indices
+    std::unordered_map<std::string, vertex> nodeMap;
+    int vertexIndex = 0;
+
+    // Add nodes to the graph
+    for (const auto& node : j["nodes"]) {
+        nodeMap[node["id"]] = vertexIndex++;
+    }
+
+    // Add edges to the graph
+    for (const auto& edge : j["edges"]) {
+        vertex v1 = nodeMap[edge["from"]];
+        vertex v2 = nodeMap[edge["to"]];
+        graph.addEdge(v1, v2);
+    }
 }
 
+// Main function to test the graph reading
 int main() {
-    std::cout << "Iniciando o programa principal..." << std::endl;
-    Graph cityGraph;
+    const std::string filename = "city_graph.json";
+    int numVertices = 10;  // Replace with the actual number of nodes in your graph
+    GraphAdjList graph(numVertices);
 
-    // Load the graph from JSON
-    if (!cityGraph.loadFromJson("city_graph.json")) {
-        std::cerr << "Falha ao carregar o grafo do JSON." << std::endl;
-        return 1;
-    }
-    std::cout << "Grafo carregado com sucesso." << std::endl;
+    // Load the graph from the JSON file
+    loadGraphFromJson(filename, graph);
 
-    // Retrieve regions from the graph
-    const std::vector<Region>& regions = cityGraph.getRegions();
-
-    std::unordered_map<int, std::string> result;
-    findBestStations(cityGraph, result);
-
-    // Print results
-    for (const auto& entry : result) {
-        std::cout << "Region: " << entry.first << ", Best Node: " << entry.second << std::endl;
-    }
-
-    Graph newGraph;
-    createGraphFromBestStations(result, newGraph, cityGraph);
-
-    std::cout << "Novo grafo com as melhores estações criado." << std::endl;
-    std::cout << "Número de nós no novo grafo: " << newGraph.getNodes().size() << std::endl;
-    std::cout << "Número de arestas no novo grafo: " << newGraph.getEdges().size() << std::endl;
-
-    std::vector<Edge> mstEdges;
-    mstKruskalFast(newGraph, mstEdges);
-
-    mstEdges = newGraph.getEdges();
-
-    // Print MST edges
-    if (!mstEdges.empty()) {
-        std::cout << "[";
-        for (size_t i = 0; i < mstEdges.size(); ++i) {
-            const auto& entry = mstEdges[i];
-            std::cout << "('" << entry.from << "','" << entry.to << "')";
-            if (i < mstEdges.size() - 1) {
-                std::cout << ",";  // Add a comma if it's not the last element
-            }
-        }
-        std::cout << "]" << std::endl;
-    } else {
-        std::cout << "No edges in MST." << std::endl;
-    }
+    // Print the graph to check if the edges are correctly loaded
+    std::cout << "Graph edges:" << std::endl;
+    graph.print();
 
     return 0;
 }

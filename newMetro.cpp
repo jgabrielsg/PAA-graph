@@ -225,45 +225,77 @@ void findBestStations(const Graph& graph, std::unordered_map<int, std::string>& 
         bestStations[region.number] = bestNode;
     }
 }
+
+std::vector<std::pair<std::string, std::string>> getPathEdgesFromParents(
+    const Graph& graph, 
+    const std::vector<std::string>& parent, 
+    const std::string& startNodeId) {
+    
+    std::vector<std::pair<std::string, std::string>> pathEdges;
+    std::string currentNodeId = startNodeId;
+
+    // Traverse from the start node to the root using parent pointers
+    while (parent[getNodeIndex(currentNodeId)] != currentNodeId) {
+        std::string parentNodeId = parent[getNodeIndex(currentNodeId)];
+        
+        // Add the edge (parentNodeId -> currentNodeId)
+        pathEdges.push_back({parentNodeId, currentNodeId});
+        
+        // Move to the parent node
+        currentNodeId = parentNodeId;
+    }
+
+    // The pathEdges vector will contain the edges from the root to the start node.
+    std::reverse(pathEdges.begin(), pathEdges.end()); // Reverse to make it from root to start node
+
+    return pathEdges;
+}
+
 void createGraphFromBestStations(
     const std::unordered_map<int, std::string>& bestStations,
     Graph& newGraph, Graph& oldGraph) {
 
-    // Retrieve nodes and edges from the original graph
-    const std::vector<Node>& nodes = oldGraph.getNodes();
-    const std::vector<Edge>& edges = oldGraph.getEdges();
+    // Iterate through each best station (key: region number, value: node ID of the best station)
+    for (const auto& region : bestStations) {
+        std::string bestStationId = region.second;
 
-    // Add nodes that are part of bestStations
-    for (const auto& entry : bestStations) {
-        std::string stationId = entry.second;
-        const auto& node = *std::find_if(nodes.begin(), nodes.end(),
-                                         [&stationId](const Node& n) { return n.id == stationId; });
-        newGraph.addNode(node);
-    }
+        // Run Dijkstra from the best station
+        std::vector<std::string> parent;
+        std::vector<int> distance;
+        cptDijkstraFast(oldGraph, bestStationId, parent, distance);
 
-    // Add nodes connected by edges (if the edge is between bestStations)
-    for (const auto& edge : edges) {
-        bool isFromBestStation = bestStations.find(oldGraph.getNodeIndex(edge.from)) != bestStations.end();
-        bool isToBestStation = bestStations.find(oldGraph.getNodeIndex(edge.to)) != bestStations.end();
+        // For each of the other best stations, find the path from bestStationId to it
+        for (const auto& otherRegion : bestStations) {
+            std::string otherBestStationId = otherRegion.second;
 
-        // If both ends of the edge are in the bestStations, add the edge to newGraph
-        if (isFromBestStation && isToBestStation) {
-            newGraph.addEdge(edge);
-        } else {
-            // Add the node connected by the edge if it is not already part of bestStations
-            if (isFromBestStation) {
-                const auto& nodeToAdd = *std::find_if(nodes.begin(), nodes.end(),
-                                                      [&edge](const Node& n) { return n.id == edge.to; });
-                newGraph.addNode(nodeToAdd);
+            // Skip if it's the same station
+            if (bestStationId == otherBestStationId) {
+                continue;
             }
-            if (isToBestStation) {
-                const auto& nodeToAdd = *std::find_if(nodes.begin(), nodes.end(),
-                                                      [&edge](const Node& n) { return n.id == edge.from; });
-                newGraph.addNode(nodeToAdd);
+
+            // Get the path from bestStationId to otherBestStationId using parent info
+            std::vector<std::pair<std::string, std::string>> pathEdges = getPathEdgesFromParents(oldGraph, parent, otherBestStationId);
+
+            // Add the nodes and edges to the new graph
+            for (const auto& edge : pathEdges) {
+                const std::string& fromNodeId = edge.first;
+                const std::string& toNodeId = edge.second;
+
+                // Add the 'from' node to the new graph if not already present
+                if (!newGraph.containsNode(fromNodeId)) {
+                    newGraph.addNode(fromNodeId);
+                }
+
+                // Add the 'to' node to the new graph if not already present
+                if (!newGraph.containsNode(toNodeId)) {
+                    newGraph.addNode(toNodeId);
+                }
+
+                // Add the edge between 'from' and 'to' to the new graph if not already present
+                if (!newGraph.containsEdge(fromNodeId, toNodeId)) {
+                    newGraph.addEdge(fromNodeId, toNodeId, oldGraph.getEdgeCost(fromNodeId, toNodeId));
+                }
             }
         }
     }
 }
-
-
-
