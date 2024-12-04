@@ -190,7 +190,7 @@ std::vector<std::pair<std::string, std::string>> Graph::getPathFromParents(
     return path;
 }
 
-void findBestStations(Graph& graph, std::unordered_map<int, std::string>& bestStations) {
+void findBestStations(const Graph& graph, std::unordered_map<int, std::string>& bestStations) {
     const std::vector<Region>& regions = graph.getRegions();
     const std::vector<Node>& nodes = graph.getNodes();
 

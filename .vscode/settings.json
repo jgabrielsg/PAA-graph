@@ -81,6 +81,7 @@
         "xutility": "cpp",
         "unordered_set": "cpp",
         "condition_variable": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "random": "cpp"
     }
 }
