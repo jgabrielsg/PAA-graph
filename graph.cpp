@@ -6,7 +6,7 @@
 using json = nlohmann::json;
 
 Graph::Graph(int numVertices)
-    : m_numVertices(numVertices), m_numEdges(0) {}
+    : m_numVertices(numVertices), m_numEdges(0), m_nodeIds(numVertices, "") {}
 
 Graph::~Graph() {
     for (auto& pair : m_edges) {

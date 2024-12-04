@@ -10,38 +10,67 @@ using json = nlohmann::json;
 
 // Function to load the graph from the JSON file
 void loadGraphFromJson(const std::string& filename, Graph& graph) {
-    // Open the JSON file
-    std::ifstream inputFile(filename);
-    if (!inputFile) {
-        std::cerr << "Error opening file: " << filename << std::endl;
-        return;
-    }
+    // Open the JSON file and parse it
+    std::ifstream file(filename);
+    json graphData;
+    file >> graphData;
 
-    json j;
-    inputFile >> j;
+    // Load nodes and edges
+    auto nodes = graphData["nodes"];
+    auto edges = graphData["edges"];
 
-    // Create a map for node IDs to vertex indices
+    // Map node ids to integer indices
     std::unordered_map<std::string, vertex> nodeMap;
-    int vertexIndex = 0;
+    vertex nodeId = 0;
 
     // Add nodes to the graph
-    for (const auto& node : j["nodes"]) {
-        nodeMap[node["id"]] = vertexIndex++;
+    for (const auto& node : nodes) {
+        std::string nodeIdStr = node["id"];
+        
+        // Store node ID and region before incrementing
+        graph.setNodeId(nodeId, nodeIdStr); // Set node ID for the current vertex
+        graph.setRegion(nodeIdStr, node["region"]);  // Store the region
+        
+        nodeMap[nodeIdStr] = nodeId;  // Map node ID to current vertex index
+        nodeId++;  // Increment for the next node
     }
 
+
+
     // Add edges to the graph
-    for (const auto& edge : j["edges"]) {
-        vertex v1 = nodeMap[edge["from"]];
-        vertex v2 = nodeMap[edge["to"]];
-        int cost = edge["price_cost"];  // Ensure we're using 'price_cost' here
+    for (const auto& edge : edges) {
+        std::string fromNodeId = edge["from"];
+        std::string toNodeId = edge["to"];
+        
+        // Get corresponding vertex indices for the node IDs
+        vertex v1 = nodeMap[fromNodeId];
+        vertex v2 = nodeMap[toNodeId];
+
+        // Read edge properties
+        int cost = edge["price_cost"];  // Assuming 'price_cost' is the cost
         int distance = edge["distance"];
-        graph.addEdge(v1, v2, cost, distance);  // Assuming the Graph class handles edge addition with 'cost'
+
+        // Add the edge to the graph in both directions (undirected graph)
+        graph.addEdge(v1, v2, cost, distance);
+        graph.addEdge(v2, v1, cost, distance);
     }
 }
 
+
 int main() {
     const std::string filename = "city_graph.json";
-    int numVertices = 10;  // Replace with the actual number of nodes in your graph
+
+    // First, parse the JSON to count the number of nodes
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open " << filename << std::endl;
+        return 1;
+    }
+    
+    json graphData;
+    file >> graphData;
+    auto nodes = graphData["nodes"];
+    int numVertices = nodes.size();  // Replace with the actual number of nodes in your graph
     Graph graph(numVertices);
 
     // Load the graph from the JSON file
@@ -60,7 +89,13 @@ int main() {
 
     std::cout << "\nDijkstra's Algorithm Result:" << std::endl;
     for (vertex v = 0; v < graph.getNumVertices(); ++v) {
-        std::cout << "Distance to vertex " << v << ": " << distance[v] << ", Parent: " << parent[v] << std::endl;
+        // Retrieve the node ID based on the vertex index
+        std::string nodeId = graph.getNodeId(v); 
+        
+        std::cout << "Distance to vertex " << v << ": " 
+                << distance[v] << ", Parent: " 
+                << parent[v] << ", Region: " 
+                << graph.getRegion(nodeId) << std::endl;
     }
 
     // Run Kruskal's algorithm for MST
