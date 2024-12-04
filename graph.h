@@ -1,4 +1,3 @@
-// Graph.h
 #ifndef GRAPH_H
 #define GRAPH_H
 
@@ -15,7 +14,7 @@ struct Node {
     std::string id;
     std::pair<int, int> location;
     std::vector<std::string> transport_options;
-    // std::string region; // Removed or made optional
+    int region; // Added region attribute
 };
 
 // Structure to represent an Edge
@@ -27,6 +26,12 @@ struct Edge {
     double distance;
     double price_cost;
     double time_cost;
+    double excavation_cost;
+    int num_residencial;
+    int num_comercial;
+    int num_touristic;
+    int num_industrial;
+    int bus_preference;
 };
 
 // Structure to represent a Property
@@ -37,6 +42,12 @@ struct Property {
     std::string type;
     std::string from;
     std::string to;
+};
+
+// Structure to represent a Region
+struct Region {
+    int number;                // Region name (e.g., "Region1")
+    std::vector<std::string> nodes;  // Node IDs belonging to the region
 };
 
 // Graph class
@@ -50,14 +61,29 @@ public:
     const std::vector<Edge>& getEdges() const;
     const std::vector<Property>& getProperties() const;
     
+    // Added getter for regions
+    const std::vector<Region>& getRegions() const;
+    
+    // New methods to add nodes, edges, and properties
+    void addNode(const Node& node);
+    void addEdge(const Edge& edge);
+    void addProperty(const Property& property);
+    
     void printNodes() const;
     void printEdges() const;
     void printProperties() const;
+
+    // Add this declaration
+    std::unordered_map<std::string, double> getNeighbors(const std::string& nodeId) const;
 
 private:
     std::vector<Node> nodes;
     std::vector<Edge> edges;
     std::vector<Property> properties;
+    std::vector<Region> regions; // Stored regions
+
+    // Helper to group nodes into regions
+    void groupNodesIntoRegions();
 };
 
 #endif // GRAPH_H

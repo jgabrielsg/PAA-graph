@@ -73,15 +73,32 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
         for j in range(M):
             if random.random() >= 0.3:
                 node_id = f"node_{i}_{j}"
+                
+                # Determine the region based on (i, j)
+                if i < N // 4:
+                    cep = "51000"  # Região 1
+                    region = 1
+                elif i > 3 * N // 4:
+                    cep = "54000"  # Região 4
+                    region = 2
+                elif i >= N // 4 and i <= 3 * N // 4:
+                    if j < M // 2:
+                        cep = "52000"  # Região 2
+                        region = 3
+                    else:
+                        cep = "53000"  # Região 3
+                        region = 4
+                
                 node_data = {
                     "id": node_id,
                     "location": (i, j),
-                    "transport_options": ["taxi", "non_motorized"],  # Táxi e não motorizado
+                    "transport_options": ["taxi", "non_motorized"],
+                    "region": region  # Added region information
                 }
                 graph["nodes"].append(node_data)
-                nodes_exist[(i, j)] = True  # Marca o nó como existente
+                nodes_exist[(i, j)] = True
             else:
-                nodes_exist[(i, j)] = False  # Marca o nó como inexistente
+                nodes_exist[(i, j)] = False
 
 
     for i in range(N):
