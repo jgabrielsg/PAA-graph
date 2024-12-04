@@ -77,17 +77,17 @@ def create_grid_graph_with_random_vertices(N, M, street_length=200, max_speed=15
                 # Determine the region based on (i, j)
                 if i < N // 4:
                     cep = "51000"  # Região 1
-                    region = "Region1"
+                    region = 1
                 elif i > 3 * N // 4:
                     cep = "54000"  # Região 4
-                    region = "Region4"
+                    region = 2
                 elif i >= N // 4 and i <= 3 * N // 4:
                     if j < M // 2:
                         cep = "52000"  # Região 2
-                        region = "Region2"
+                        region = 3
                     else:
                         cep = "53000"  # Região 3
-                        region = "Region3"
+                        region = 4
                 
                 node_data = {
                     "id": node_id,
