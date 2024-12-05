@@ -16,10 +16,17 @@ Além disso, o código também otimiza trajetos com base no tempo e no custo. Ut
 
 ---
 
-**Autores:**
+### **Instruções para Rodar o Código:**
 
-- **Guilherme Buss da Silva**
-- **Guilherme Carvalho Cunha**
-- **Gustavo Bianchi da Silva**
-- **João Gabriel Machado**
-- **Vinícius Pereira Nascimento**
+1. **Baixe um compilador de C++:** 
+   Para compilar o código, é necessário ter um compilador C++ instalado. Recomendamos o **MSYS2**, que é uma plataforma de desenvolvimento que fornece ferramentas de compilação, como o `g++`.
+
+2. **Instale o MSYS2:**
+   - Baixe o MSYS2 em: [https://www.msys2.org](https://www.msys2.org).
+   - Siga as instruções de instalação para o seu sistema operacional.
+
+3. **Compile os Arquivos:**
+   Após instalar o MSYS2, abra o terminal do MSYS2 e navegue até o diretório onde os arquivos do projeto estão localizados. Execute o seguinte comando para compilar todos os arquivos e gerar o executável:
+
+   ```bash
+   g++ -std=c++17 main.py fastestRouteQ3.cpp graph.cpp newMetro.cpp graph.cpp -o PathSeekerAlgorithm
