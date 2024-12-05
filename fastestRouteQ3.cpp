@@ -56,8 +56,12 @@ std::pair<std::vector<vertex>, double> obter_melhor_trajeto(
     // Estado inicial: tempo = 0, dinheiro = 0, modo = "walk"
     fila.push(Estado{0.0, 0.0, v_inicial, "walk", {v_inicial}});
 
-    // Mapa para armazenar os estados visitados: (vértice, modo) -> dinheiro mínimo gasto
-    std::unordered_map<std::string, double> visitados;
+    // Mapa para armazenar os estados visitados: (vértice, modo) -> tempo mínimo gasto
+    std::unordered_map<std::string, std::pair<double, double>> visitados;
+
+    // Variáveis para armazenar o melhor caminho e o menor tempo
+    double melhorTempo = std::numeric_limits<double>::max();
+    std::vector<vertex> melhorCaminho;
 
     while (!fila.empty()) {
         Estado atualEstado = fila.top();
@@ -74,16 +78,27 @@ std::pair<std::vector<vertex>, double> obter_melhor_trajeto(
             return {caminhoAtual, tempoAtual};
         }
 
+        // Se chegou ao destino, atualiza o melhor tempo e caminho
+        if (verticeAtual == v_final) {
+            if (tempoAtual < melhorTempo) {
+                melhorTempo = tempoAtual;
+                melhorCaminho = caminhoAtual;
+            }
+        }
+
         // Chave para o mapa de visitados
         std::string chave = std::to_string(verticeAtual) + "_" + modoAtual;
 
-        // Verifica se já visitou este estado com menos ou igual dinheiro
-        if (visitados.find(chave) != visitados.end() && visitados[chave] <= dinheiroAtual) {
-            continue;
+        // Verifica se já visitou este estado com menos tempo   
+        if (visitados.find(chave) != visitados.end()) {
+            auto [tempoVisitado, custoVisitado] = visitados[chave];
+            if (tempoVisitado <= tempoAtual && custoVisitado <= dinheiroAtual) {
+                continue;  
+            }
         }
 
         // Marca como visitado
-        visitados[chave] = dinheiroAtual;
+        visitados[chave] = {tempoAtual, dinheiroAtual};
 
         // Itera sobre as arestas do vértice atual
         Edge* edge = grafo.getEdges(verticeAtual);
@@ -164,5 +179,5 @@ std::pair<std::vector<vertex>, double> obter_melhor_trajeto(
     }
 
     // Caso não encontre um caminho válido
-    return {std::vector<vertex>(), std::numeric_limits<double>::max()};
+    return {melhorCaminho, melhorTempo};
 }
