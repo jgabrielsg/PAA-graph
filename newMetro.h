@@ -3,9 +3,10 @@
 
 #include "Graph.h"
 #include "dataStructures.h"
+#include <tuple>
 
 std::vector<std::vector<vertex>> criarRegioes(Graph &g);
-std::vector<Edge*> escavacaoMetro(Graph& graph);
+std::tuple<std::vector<Edge*>, int> escavacaoMetro(Graph& graph);
 
 class Dijkstra {
 public:

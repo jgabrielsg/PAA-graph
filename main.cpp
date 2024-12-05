@@ -4,7 +4,9 @@
 #include <unordered_map>
 #include "external/json.hpp"
 #include "graph.h"
-#include "newMetro.h"  // Assuming this includes your Dijkstra and Kruskal algorithms
+#include "newMetro.h"  
+#include <tuple>
+#include <fstream>
 
 using json = nlohmann::json;
 
@@ -84,55 +86,49 @@ int main() {
     loadGraphFromJson(filename, graph);
 
     // Print the graph to check if the edges are correctly loaded
-    std::cout << "Graph edges:" << std::endl;
-    graph.print();
-    
-    // Run Dijkstra's algorithm
-    Dijkstra dijkstra;
-    int* parent = new int[graph.getNumVertices()];
-    int* distance = new int[graph.getNumVertices()];
-    vertex startVertex = 0; // Assuming vertex 0 is the start
-    dijkstra.cptDijkstraFast(startVertex, parent, distance, graph);
-
-    // std::cout << "\nDijkstra's Algorithm Result:" << std::endl;
-    // for (vertex v = 0; v < graph.getNumVertices(); ++v) {
-    //     // Retrieve the node ID based on the vertex index
-    //     std::string nodeId = graph.getNodeId(v); 
-        
-    //     std::cout << "Distance to vertex " << v << ": " 
-    //             << distance[v] << ", Parent: " 
-    //             << parent[v] << ", Region: " 
-    //             << graph.getRegion(nodeId) << std::endl;
-    // }
-
-    std::cout << "Iniciando Kruskal..." << std::endl;
-
-    // Run Kruskal's algorithm for MST
-    std::vector<Edge*> mstEdges;
-    Kruskal kruskal;
-    kruskal.mstKruskalFast(mstEdges, graph);
-
-    // std::cout << "\nKruskal's Algorithm Result (Minimum Spanning Tree):" << std::endl;
-    // for (Edge* edge : mstEdges) {
-    //     std::cout << "Edge " << edge->v1() << " - " << edge->v2() << " with cost: " << edge->cost() << std::endl;
-    //     delete edge;  // Clean up dynamically allocated memory
-    // }
+    // std::cout << "Graph edges:" << std::endl;
+    // graph.print();
 
     std::cout << "Iniciando escavacaoMetro..." << std::endl;
+    
+    std::tuple<std::vector<Edge*>, int> result = escavacaoMetro(graph);
+    std::vector<Edge*> mst = std::get<0>(result);
+    int totalCost = std::get<1>(result);
 
-    std::vector<Edge*> teste;
-    teste = escavacaoMetro(graph);
-    std::cout << "[";
-    for (const auto& edge : teste) {
+    std::cout << "escavacaoMetro finalizado!" << std::endl;
+
+    // std::cout << "[";
+    // for (const auto& edge : mst) {
+    //     if (edge) {
+    //         std::cout << "('" << graph.getNodeId(edge->v1()) << "','" << graph.getNodeId(edge->v2()) << "'),";
+    //     }
+    // }
+    // std::cout << "]" << std::endl;
+
+    std::ofstream outFile("station_edges.txt");
+    if (!outFile.is_open()) {
+        std::cerr << "Falha ao abrir o arquivo para escrita." << std::endl;
+        return 1;
+    }
+
+    // Escrever as edges no arquivo mantendo o formato desejado
+    outFile << "[";
+    bool first = true;
+    for (const auto& edge : mst) {
         if (edge) {
-            std::cout << "('" << graph.getNodeId(edge->v1()) << "','" << graph.getNodeId(edge->v2()) << "'),";
+            if (!first) {
+                outFile << ",";
+            }
+            outFile << "('" << graph.getNodeId(edge->v1()) << "','" << graph.getNodeId(edge->v2()) << "')";
+            first = false;
         }
     }
-    std::cout << "]" << std::endl;
+    outFile << "]" << std::endl;
 
-    // Clean up dynamically allocated memory
-    delete[] parent;
-    delete[] distance;
+    // Fechar o arquivo (opcional, pois o destruidor faz isso automaticamente)
+    outFile.close();
+
+    std::cout << "Custo total de excavacao: " << std::get<1>(result) << std::endl;
 
     return 0;
 }

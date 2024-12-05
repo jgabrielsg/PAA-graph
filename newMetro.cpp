@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "Graph.h"
 #include <limits.h>
+#include <tuple>
 
 void Dijkstra::cptDijkstraFast(vertex v0, vertex* parent, int* distance, Graph& graph) {
     std::vector<bool> checked(graph.getNumVertices(), false);
@@ -96,12 +97,10 @@ std::vector<std::vector<vertex>> criarRegioes(Graph& graph) {
     return regioes;
 }
 
-std::vector<Edge*> escavacaoMetro(Graph& graph) {
+std::tuple<std::vector<Edge*>, int> escavacaoMetro(Graph& graph) {
     std::vector<vertex> estacoes;
     std::vector<Edge*> solucao;  
     std::vector<std::vector<vertex>> regioes;
-
-    std::cout << "a" << std::endl;
 
     regioes = criarRegioes(graph);
     int numVertices = graph.getNumVertices();
@@ -135,14 +134,8 @@ std::vector<Edge*> escavacaoMetro(Graph& graph) {
         parentMap[c_min] = bestParent;
     }
 
-    std::cout << "b" << std::endl;
-
     // construindo um subgrafo
     Graph subgrafo(numVertices);
-
-    for (vertex v1 : estacoes) {
-        std::cout << v1 << std::endl;
-    }
 
     for (vertex v1 : estacoes) {
         for (vertex v2 : estacoes) {
@@ -188,8 +181,7 @@ std::vector<Edge*> escavacaoMetro(Graph& graph) {
         }
     }
 
-    std::cout << "c" << std::endl;
-
+    int TotalCost = 0;
     std::vector<Edge*> arestasOrdenadas;
     for (vertex v : estacoes) {
 
@@ -197,21 +189,16 @@ std::vector<Edge*> escavacaoMetro(Graph& graph) {
 
         while (edge) {
             arestasOrdenadas.push_back(edge);
-            std::cout << "c1" << std::endl;
+            TotalCost += edge->cost();
             edge = edge->next();
-            std::cout << "c2" << std::endl;
         }
     }
-
-    std::cout << "d" << std::endl;
 
     std::sort(arestasOrdenadas.begin(), arestasOrdenadas.end(), [](Edge* e1, Edge* e2) {
         return e1->cost() < e2->cost();
     });
 
-    std::cout << "e" << std::endl;
-
     Kruskal::mstKruskalFast(solucao, subgrafo);
 
-    return solucao;
+    return std::make_tuple(solucao, TotalCost);
 }
