@@ -38,7 +38,7 @@ double calcularCusto(const Edge& edge, const std::string& transport_type) {
     } else if (transport_type == "onibus") {
         return 3.50;
     } else if (transport_type == "taxi") {
-        return 10.0 + 2.50 * (edge.distance()/1000);
+        return edge.price_cost();
     }
     return std::numeric_limits<double>::max();
 }
@@ -60,7 +60,7 @@ std::pair<std::vector<vertex>, double> obter_melhor_trajeto(
     std::unordered_map<std::string, std::pair<double, double>> visitados;
 
     // Variáveis para armazenar o melhor caminho e o menor tempo
-    double melhorTempo = std::numeric_limits<double>::max();
+    double melhorTempo = 0;
     std::vector<vertex> melhorCaminho;
 
     while (!fila.empty()) {
@@ -143,8 +143,8 @@ std::pair<std::vector<vertex>, double> obter_melhor_trajeto(
                 tempoAresta = calcularTempo(*edge, "taxi");
                 novoModo = "taxi";
                 // Se a pessoa já estiver no taxi, o custo fixo deve ser descontado
-                if (modoAtual == "taxi") {
-                    custoAresta -= 10;
+                if (modoAtual != "taxi") {
+                    custoAresta += 10.0;
                 }
             }
             // Se a aresta for caminhar
