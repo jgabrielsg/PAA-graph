@@ -6,7 +6,11 @@
 using json = nlohmann::json;
 
 Graph::Graph(int numVertices)
-    : m_numVertices(numVertices), m_numEdges(0), m_nodeIds(numVertices, "") {}
+    : m_numVertices(numVertices), m_numEdges(0), m_nodeIds(numVertices, "") {
+        for(vertex v = 0; v < numVertices; ++v){
+            m_edges[v] = nullptr;  // Initialize each vertex with no edges
+        }
+    }
 
 Graph::~Graph() {
     for (auto& pair : m_edges) {
@@ -19,9 +23,12 @@ Graph::~Graph() {
     }
 }
 
-void Graph::addEdge(vertex v1, vertex v2, int cost, int distance) {
+// Função addEdge atualizada para incluir novos atributos
+void Graph::addEdge(vertex v1, vertex v2, double cost, int distance, const std::string& transport_type, double max_speed, double price_cost, double time_cost, int num_residencial, int num_commercial, int num_touristic, int num_industrial, int bus_preference) {
     if (!hasEdge(v1, v2)) {
-        m_edges[v1] = new Edge(v1, v2, cost, distance, m_edges[v1]);
+        // Cria uma nova aresta com todos os atributos e adiciona à lista encadeada de arestas do vértice v1
+        Edge* newEdge = new Edge(v1, v2, cost, distance, transport_type, max_speed, price_cost, time_cost, num_residencial, num_commercial, num_touristic, num_industrial, bus_preference, m_edges[v1]);
+        m_edges[v1] = newEdge;
         m_numEdges++;
     }
 }
@@ -86,13 +93,27 @@ void Graph::loadFromJSON(const std::string& filename) {
         nodeMap[node["id"]] = nodeId++;
     }
 
+    // Adiciona arestas ao grafo
     for (const auto& edge : edges) {
         vertex v1 = nodeMap[edge["from"]];
         vertex v2 = nodeMap[edge["to"]];
-        int cost = edge["cost"]; 
-        int distance = edge["distance"]; // Extract the cost from the JSON object
-        addEdge(v1, v2, cost, distance);   // Add edge from v1 to v2
-        addEdge(v2, v1, cost, distance);   // Add edge from v2 to v1 (since the graph is undirected)
+
+        // Lê as propriedades da aresta
+        std::string transport_type = edge["transport_type"];
+        double max_speed = edge["max_speed"];
+        double price_cost = edge["price_cost"];
+        double time_cost = edge["time_cost"];
+        int num_residencial = edge["num_residencial"];
+        int num_commercial = edge["num_commercial"];
+        int num_touristic = edge["num_touristic"];
+        int num_industrial = edge["num_industrial"];
+        int bus_preference = edge["bus_preference"];
+        int distance = edge["distance"];
+        double cost = edge["price_cost"];  // Usando 'price_cost' como custo para Kruskal
+
+        // Adiciona a aresta ao grafo em ambas as direções (grafo não direcionado)
+        addEdge(v1, v2, cost, distance, transport_type, max_speed, price_cost, time_cost, num_residencial, num_commercial, num_touristic, num_industrial, bus_preference);
+        addEdge(v2, v1, cost, distance, transport_type, max_speed, price_cost, time_cost, num_residencial, num_commercial, num_touristic, num_industrial, bus_preference);
     }
 
 }

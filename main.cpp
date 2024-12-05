@@ -3,7 +3,7 @@
 #include <climits>
 #include <unordered_map>
 #include "external/json.hpp"
-#include "Graph.h"
+#include "graph.h"
 #include "newMetro.h"  // Assuming this includes your Dijkstra and Kruskal algorithms
 
 using json = nlohmann::json;
@@ -35,8 +35,6 @@ void loadGraphFromJson(const std::string& filename, Graph& graph) {
         nodeId++;  // Increment for the next node
     }
 
-
-
     // Add edges to the graph
     for (const auto& edge : edges) {
         std::string fromNodeId = edge["from"];
@@ -49,10 +47,19 @@ void loadGraphFromJson(const std::string& filename, Graph& graph) {
         // Read edge properties
         int cost = edge["excavation_cost"];  // Assuming 'price_cost' is the cost
         int distance = edge["distance"];
+        std::string transport_type = edge["transport_type"];
+        double max_speed = edge["max_speed"];
+        double price_cost = edge["price_cost"];
+        double time_cost = edge["time_cost"];
+        int num_residencial = edge["num_residencial"];
+        int num_commercial = edge["num_commercial"];
+        int num_touristic = edge["num_touristic"];
+        int num_industrial = edge["num_industrial"];
+        int bus_preference = edge["bus_preference"];
 
         // Add the edge to the graph in both directions (undirected graph)
-        graph.addEdge(v1, v2, cost, distance);
-        graph.addEdge(v2, v1, cost, distance);
+        graph.addEdge(v1, v2, cost, distance, transport_type, max_speed, price_cost, time_cost, num_residencial, num_commercial, num_touristic, num_industrial, bus_preference);
+        graph.addEdge(v2, v1, cost, distance, transport_type, max_speed, price_cost, time_cost, num_residencial, num_commercial, num_touristic, num_industrial, bus_preference);
     }
 }
 
@@ -79,7 +86,7 @@ int main() {
     // Print the graph to check if the edges are correctly loaded
     std::cout << "Graph edges:" << std::endl;
     graph.print();
-
+    
     // Run Dijkstra's algorithm
     Dijkstra dijkstra;
     int* parent = new int[graph.getNumVertices()];
@@ -87,27 +94,41 @@ int main() {
     vertex startVertex = 0; // Assuming vertex 0 is the start
     dijkstra.cptDijkstraFast(startVertex, parent, distance, graph);
 
-    std::cout << "\nDijkstra's Algorithm Result:" << std::endl;
-    for (vertex v = 0; v < graph.getNumVertices(); ++v) {
-        // Retrieve the node ID based on the vertex index
-        std::string nodeId = graph.getNodeId(v); 
+    // std::cout << "\nDijkstra's Algorithm Result:" << std::endl;
+    // for (vertex v = 0; v < graph.getNumVertices(); ++v) {
+    //     // Retrieve the node ID based on the vertex index
+    //     std::string nodeId = graph.getNodeId(v); 
         
-        std::cout << "Distance to vertex " << v << ": " 
-                << distance[v] << ", Parent: " 
-                << parent[v] << ", Region: " 
-                << graph.getRegion(nodeId) << std::endl;
-    }
+    //     std::cout << "Distance to vertex " << v << ": " 
+    //             << distance[v] << ", Parent: " 
+    //             << parent[v] << ", Region: " 
+    //             << graph.getRegion(nodeId) << std::endl;
+    // }
+
+    std::cout << "Iniciando Kruskal..." << std::endl;
 
     // Run Kruskal's algorithm for MST
     std::vector<Edge*> mstEdges;
     Kruskal kruskal;
     kruskal.mstKruskalFast(mstEdges, graph);
 
-    std::cout << "\nKruskal's Algorithm Result (Minimum Spanning Tree):" << std::endl;
-    for (Edge* edge : mstEdges) {
-        std::cout << "Edge " << edge->v1() << " - " << edge->v2() << " with cost: " << edge->cost() << std::endl;
-        delete edge;  // Clean up dynamically allocated memory
+    // std::cout << "\nKruskal's Algorithm Result (Minimum Spanning Tree):" << std::endl;
+    // for (Edge* edge : mstEdges) {
+    //     std::cout << "Edge " << edge->v1() << " - " << edge->v2() << " with cost: " << edge->cost() << std::endl;
+    //     delete edge;  // Clean up dynamically allocated memory
+    // }
+
+    std::cout << "Iniciando escavacaoMetro..." << std::endl;
+
+    std::vector<Edge*> teste;
+    teste = escavacaoMetro(graph);
+    std::cout << "[";
+    for (const auto& edge : teste) {
+        if (edge) {
+            std::cout << "('" << graph.getNodeId(edge->v1()) << "','" << graph.getNodeId(edge->v2()) << "'),";
+        }
     }
+    std::cout << "]" << std::endl;
 
     // Clean up dynamically allocated memory
     delete[] parent;

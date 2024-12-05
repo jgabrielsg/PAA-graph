@@ -4,6 +4,9 @@
 #include "Graph.h"
 #include "dataStructures.h"
 
+std::vector<std::vector<vertex>> criarRegioes(Graph &g);
+std::vector<Edge*> escavacaoMetro(Graph& graph);
+
 class Dijkstra {
 public:
     static void cptDijkstraFast(vertex v0, vertex* parent, int* distance, Graph& graph);

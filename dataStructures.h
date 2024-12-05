@@ -26,7 +26,7 @@ public:
 
 class UnionFind {
 public:
-    // Constructor initializes the disjoint set with `numElements` elements
+    // Constructor initializes the disjoint set with numElements elements
     UnionFind(int numElements)
         : m_numElements(numElements), m_group(nullptr), m_groupSize(nullptr) {
         m_group = new int[numElements];
@@ -45,7 +45,7 @@ public:
         delete[] m_groupSize;
     }
 
-    // Find the leader (root) of the set to which element `e` belongs
+    // Find the leader (root) of the set to which element e belongs
     int findE(int e) {
         // Path compression: Make every node on the path point directly to the root
         if (m_group[e] != e) {
@@ -54,7 +54,7 @@ public:
         return m_group[e];
     }
 
-    // Union of two sets: the ones containing `e1` and `e2`
+    // Union of two sets: the ones containing e1 and e2
     void unionE(int e1, int e2) {
         int root1 = findE(e1);
         int root2 = findE(e2);

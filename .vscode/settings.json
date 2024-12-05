@@ -82,6 +82,14 @@
         "unordered_set": "cpp",
         "condition_variable": "cpp",
         "future": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "*.tcc": "cpp",
+        "cstdarg": "cpp",
+        "cwctype": "cpp",
+        "memory_resource": "cpp",
+        "string_view": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "variant": "cpp"
     }
 }

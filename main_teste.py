@@ -308,7 +308,7 @@ if __name__ == '__main__':
     G, node_colors = create_graph(graph, N, M)
 
     # Definir as arestas a serem destacadas
-    highlighted_edges = [('node_0_2','node_0_5'),('node_0_5','node_0_2'),('node_0_2','node_0_5'),('node_0_5','node_0_2'),('node_0_5','node_0_6'),('node_0_6','node_0_5'),('node_0_5','node_0_6'),('node_0_6','node_0_5'),('node_0_6','node_0_7'),('node_0_7','node_0_6'),('node_0_6','node_0_7'),('node_0_7','node_0_6')]
+    highlighted_edges = [('node_3_9','node_4_9'),('node_17_9','node_18_9'),('node_16_11','node_17_11'),('node_11_12','node_11_13'),('node_11_12','node_12_12'),('node_11_7','node_11_8'),('node_5_10','node_6_10'),('node_19_9','node_20_9'),('node_11_9','node_12_9'),('node_16_9','node_17_9'),('node_15_9','node_16_9'),('node_13_12','node_14_12'),('node_13_9','node_14_9'),('node_12_12','node_13_12'),('node_12_9','node_13_9'),('node_5_9','node_5_10'),('node_11_8','node_11_9'),('node_18_9','node_19_9'),('node_7_10','node_8_10'),('node_3_8','node_3_9'),('node_6_10','node_7_10'),('node_10_9','node_11_9'),('node_10_7','node_11_7'),('node_14_9','node_15_9'),('node_4_9','node_5_9'),('node_20_9','node_21_9'),('node_8_9','node_8_10'),('node_15_11','node_16_11'),('node_14_12','node_15_12'),('node_9_9','node_10_9'),('node_8_9','node_9_9'),('node_21_7','node_21_9'),('node_11_9','node_11_12'),]
     highlighted_edges_set = set(tuple(sorted(edge)) for edge in highlighted_edges)
 
     # Verificar quais arestas destacadas realmente existem no grafo
