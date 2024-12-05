@@ -1,12 +1,12 @@
 #ifndef DIJKSTRA_H
 #define DIJKSTRA_H
 
-#include "Graph.h"
+#include "graph.h"
 #include "dataStructures.h"
 #include <tuple>
 
 std::vector<std::vector<vertex>> criarRegioes(Graph &g);
-std::tuple<std::vector<Edge*>, int> escavacaoMetro(Graph& graph);
+std::tuple<std::vector<Edge*>, int,  std::unordered_map<vertex, std::tuple<std::vector<vertex>, std::vector<int>>>> escavacaoMetro(Graph& graph);
 
 class Dijkstra {
 public:
