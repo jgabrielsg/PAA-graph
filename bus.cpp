@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 double calculateEdgeWeight(const Edge& edge) {
     double weight = -edge.num_commercial() * 2.0 - edge.num_touristic() * 3.0 +
@@ -56,14 +57,20 @@ void designBusRoute(Graph& graph) {
     // Calcula o ciclo hamiltoniano
     std::vector<vertex> cycle = findHamiltonianCycle(graph);
 
-    // Exibe o resultado no formato desejado
-    std::cout << "[";
+        
+    std::ofstream outFile("cycle_edges.txt");
+    if (!outFile.is_open()) {
+        std::cerr << "Falha ao abrir o arquivo para escrita." << std::endl;
+        return;
+    }
+
+    outFile << "[";  // Start writing the cycle edges array
     for (size_t i = 0; i < cycle.size() - 1; i++) {
         std::string node1 = graph.getNodeId(cycle[i]);
         std::string node2 = graph.getNodeId(cycle[i + 1]);
 
-        // Imprime os pares de nós no formato ('node_1', 'node_2')
-        std::cout << "('" << node1 << "','" << node2 << "'),";
+        // Write the pairs of nodes in the format ('node_1', 'node_2')
+        outFile << "('" << node1 << "','" << node2 << "'),";
     }
 
     int numVertices = graph.getNumVertices();
@@ -74,6 +81,7 @@ void designBusRoute(Graph& graph) {
     vertex current = cycle[cycle.size() - 1];
     vertex v1 = cycle[0];
 
+    // Run Dijkstra algorithm
     Dijkstra::cptDijkstraFast(v1, parent.data(), distancia.data(), graph);
 
     while (current != v1 && current != -1) {
@@ -83,7 +91,8 @@ void designBusRoute(Graph& graph) {
         bool edgeFound = false;
         while (originalEdge) {
             if (originalEdge->otherVertex(p) == current) {
-                std::cout << "('" << graph.getNodeId(p) << "','" << graph.getNodeId(current) << "'),";
+                // Write the edge to the file
+                outFile << "('" << graph.getNodeId(p) << "','" << graph.getNodeId(current) << "'),";
                 break;
             }
             originalEdge = originalEdge->next();
@@ -92,5 +101,6 @@ void designBusRoute(Graph& graph) {
         current = p;
     }
 
-    std::cout << "]" << std::endl;
+    outFile << "]" << std::endl;  // Close the edges array
+    outFile.close();  // Close the file
 }
