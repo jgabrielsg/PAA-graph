@@ -6,6 +6,7 @@
 #include "graph.h"
 #include "newMetro.h"
 #include "bus.h"
+#include "bus3.h"
 #include <tuple>
 #include <fstream>
 
@@ -131,6 +132,29 @@ int main() {
     outFile.close();
 
     std::cout << "Custo total de excavacao: " << std::get<1>(result) << std::endl;
+
+    // 1. Calcular a matriz de distâncias entre as paradas de ônibus
+    std::cout << "Calculando a matriz de distâncias..." << std::endl;
+    std::vector<vertex> todosVertices;
+    std::vector<std::vector<int>> matrizDistancias = calcularMatrizDeDistancias(graph, todosVertices);
+
+    // Verificar se coletamos exatamente 12 vértices
+    if (todosVertices.size() != 12) {
+        std::cerr << "Erro: Esperado 12 vértices, mas coletados " << todosVertices.size() << std::endl;
+        return 1;
+    }
+
+    // 2. Criar um grafo com as distâncias e adicionar arestas
+    Graph graphDistancias(todosVertices.size()); // 12 vértices
+    adicionarArestasAoGrafo(graphDistancias, matrizDistancias);
+
+    // 3. Calcular a MST (Árvore Geradora Mínima) usando Kruskal e adicionar as arestas ao grafo original
+    std::cout << "Calculando a MST..." << std::endl;
+    calcularMST(graph, graphDistancias, todosVertices);
+
+    // (Opcional) Imprimir o grafo para verificar as arestas
+    std::cout << "Grafo atualizado após adicionar as arestas da MST:" << std::endl;
+    graph.print();
 
     return 0;
 }
