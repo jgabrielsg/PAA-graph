@@ -111,7 +111,7 @@ int main() {
         return 1;
     }
 
-    // Escrever as edges no arquivo mantendo o formato desejado
+    // Escreve as edges no arquivo
     outFile << "[";
     bool first = true;
     for (const auto& edge : mst) {
@@ -125,7 +125,6 @@ int main() {
     }
     outFile << "]" << std::endl;
 
-    // Fechar o arquivo (opcional, pois o destruidor faz isso automaticamente)
     outFile.close();
 
     std::cout << "Custo total de excavacao: " << std::get<1>(result) << std::endl;
