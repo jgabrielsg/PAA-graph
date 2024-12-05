@@ -1,161 +1,170 @@
+#include "newMetro.h"
 #include <queue>
 #include <unordered_map>
-#include <vector>
-#include <string>
 #include <limits>
-#include <tuple>
-#include <functional>
-#include <algorithm>
-#include "newMetro.h"
-#include "graph.h"
+#include <stdexcept>
 
-// unção para calcular o tempo baseado no tipo de transporte
+struct Estado {
+    double tempoGasto;         
+    double dinheiroGasto;      
+    vertex atual;
+    std::string modoAtual;
+    std::vector<vertex> caminho;
+
+    bool operator<(const Estado& other) const {
+        // Para a fila de prioridade funcionar como min-heap, invertemos a comparação
+        return tempoGasto > other.tempoGasto;
+    }
+};
+
+// Função para calcular o tempo baseado no tipo de transporte
 double calcularTempo(const Edge& edge, const std::string& transport_type) {
     if (transport_type == "metro") {
-        return (edge.distance() / 70.0) * 60; // Tempo em minutos
+        return (edge.distance() / 20.0) / 60.0; // Tempo em minutos
     } else if (transport_type == "onibus") {
-        return (edge.distance() / 50.0) * 60;
+        return (edge.distance() / 12.0) / 60.0;
     } else if (transport_type == "taxi") {
-        return (edge.distance() / 50.0) * 60;
+        return (edge.distance() / 15.0) / 60.0;
     } else if (transport_type == "walk") {
-        return (edge.distance() / 5.0) * 60;
+        return (edge.distance() / 1.5) / 60.0;
     }
     return std::numeric_limits<double>::max();
 }
 
-// função para calcular o custo baseado no tipo de transporte
+// Função para calcular o custo baseado no tipo de transporte
 double calcularCusto(const Edge& edge, const std::string& transport_type) {
     if (transport_type == "metro") {
         return 4.40;
     } else if (transport_type == "onibus") {
         return 3.50;
     } else if (transport_type == "taxi") {
-        return std::max(10.0, 2.50 * edge.distance());
+        return 10.0 + 2.50 * (edge.distance()/1000);
     }
     return std::numeric_limits<double>::max();
 }
 
-// definição de um estado para a fila de prioridade
-struct Estado {
-    int tempoGasto;
-    int dinheiroGasto;
-    vertex atual;
-    std::string modoAtual;
-    std::vector<vertex> caminho;
-
-    bool operator<(const Estado& other) const {
-        // para a fila de prioridade funcionar como min-heap, invertemos a comparação
-        return tempoGasto > other.tempoGasto;
-    }
-};
-
-// função para obter o melhor trajeto
-std::pair<std::vector<vertex>, int> obter_melhor_trajeto(
+// Função para obter o melhor trajeto
+std::pair<std::vector<vertex>, double> obter_melhor_trajeto(
     Graph& grafo,
     vertex v_inicial,
     vertex v_final,
-    int K
+    double K
 ) {
-    // fila de prioridade: min-heap baseado no tempo gasto
+    // Fila de prioridade: min-heap baseado no tempo gasto
     std::priority_queue<Estado> fila;
 
-    // estado inicial: tempo = 0, dinheiro = 0, modo = "caminhar"
-    fila.push(Estado{0, 0, v_inicial, "caminhar", {v_inicial}});
+    // Estado inicial: tempo = 0, dinheiro = 0, modo = "walk"
+    fila.push(Estado{0.0, 0.0, v_inicial, "walk", {v_inicial}});
 
-    // mapa para armazenar os estados visitados: (vértice, modo) -> dinheiro mínimo gasto
-    std::unordered_map<std::string, int> visitados;
+    // Mapa para armazenar os estados visitados: (vértice, modo) -> tempo mínimo gasto
+    std::unordered_map<std::string, std::pair<double, double>> visitados;
+
+    // Variáveis para armazenar o melhor caminho e o menor tempo
+    double melhorTempo = std::numeric_limits<double>::max();
+    std::vector<vertex> melhorCaminho;
 
     while (!fila.empty()) {
         Estado atualEstado = fila.top();
         fila.pop();
 
         vertex verticeAtual = atualEstado.atual;
-        int tempoAtual = atualEstado.tempoGasto;
-        int dinheiroAtual = atualEstado.dinheiroGasto;
+        double tempoAtual = atualEstado.tempoGasto;
+        double dinheiroAtual = atualEstado.dinheiroGasto;
         std::string modoAtual = atualEstado.modoAtual;
         std::vector<vertex> caminhoAtual = atualEstado.caminho;
 
-        // verifica se chegou ao destino
+        // Verifica se chegou ao destino
         if (verticeAtual == v_final) {
             return {caminhoAtual, tempoAtual};
         }
 
-        // chave para o mapa de visitados
-        std::string chave = std::to_string(verticeAtual) + "_" + modoAtual;
-
-        // verifica se já visitou este estado com menos ou igual dinheiro
-        if (visitados.find(chave) != visitados.end() && visitados[chave] <= dinheiroAtual) {
-            continue;
+        // Se chegou ao destino, atualiza o melhor tempo e caminho
+        if (verticeAtual == v_final) {
+            if (tempoAtual < melhorTempo) {
+                melhorTempo = tempoAtual;
+                melhorCaminho = caminhoAtual;
+            }
         }
 
-        // marca como visitado
-        visitados[chave] = dinheiroAtual;
+        // Chave para o mapa de visitados
+        std::string chave = std::to_string(verticeAtual) + "_" + modoAtual;
 
-        // itera sobre as arestas do vértice atual
+        // Verifica se já visitou este estado com menos tempo   
+        if (visitados.find(chave) != visitados.end()) {
+            auto [tempoVisitado, custoVisitado] = visitados[chave];
+            if (tempoVisitado <= tempoAtual && custoVisitado <= dinheiroAtual) {
+                continue;  
+            }
+        }
+
+        // Marca como visitado
+        visitados[chave] = {tempoAtual, dinheiroAtual};
+
+        // Itera sobre as arestas do vértice atual
         Edge* edge = grafo.getEdges(verticeAtual);
         while (edge) {
             vertex vizinho = edge->otherVertex(verticeAtual);
             std::string tipoTransporte = edge->transport_type();
-            int tempoAresta = 0;
-            int custoAresta = 0;
+            double tempoAresta = 0.0;
+            double custoAresta = 0.0;
             std::string novoModo = modoAtual;
-            int novoDinheiro = dinheiroAtual;
-            int novoTempo = tempoAtual + tempoAresta;
+            double novoDinheiro = dinheiroAtual;
+            double novoTempo = tempoAtual;
             std::vector<vertex> novoCaminho = caminhoAtual;
             novoCaminho.push_back(vizinho);
 
-            // se a aresta for uma linha de metrô
+            // Se a aresta for uma linha de metrô
             if (tipoTransporte == "metro") {
-                if (modoAtual != "metro") { // se for entrar no metrô agora
-                    custoAresta = calcularCusto(*edge, "metro");  // cobra o ticket de metrô
+                if (modoAtual != "metro") { // Se for entrar no metrô agora
+                    custoAresta = calcularCusto(*edge, "metro");  // Cobre o ticket de metrô
+                    tempoAresta = calcularTempo(*edge, "metro");
+                }
+                // Se já estiver no metrô, apenas adiciona o tempo
+                else {
                     tempoAresta = calcularTempo(*edge, "metro");
                 }
                 novoModo = "metro";
             }
-            // mesma lógica para o ônibus
+            // Mesma lógica para o ônibus
             else if (tipoTransporte == "onibus") {
                 if (modoAtual != "onibus") {
                     custoAresta = calcularCusto(*edge, "onibus"); // Custo do ticket de ônibus
                     tempoAresta = calcularTempo(*edge, "onibus");
                 }
+                // Se já estiver no ônibus, apenas adiciona o tempo
+                else {
+                    tempoAresta = calcularTempo(*edge, "onibus");
+                }
                 novoModo = "onibus";
             }
-            // se a aresta for uma linha de taxi 
+            // Se a aresta for uma linha de taxi 
             else if (tipoTransporte == "taxi") {
-                // se a pessoa já estiver no taxi, ela vai continuar nele se tiver dinheiro
-                if (modoAtual == "taxi" && dinheiroAtual + calcularCusto(*edge, "taxi") - 100 < K) 
-                {
-                    custoAresta = calcularCusto(*edge, "taxi") - 100;
-                    tempoAresta = calcularTempo(*edge, "taxi");
-                    novoModo = "taxi";
+                custoAresta = calcularCusto(*edge, "taxi");
+                tempoAresta = calcularTempo(*edge, "taxi");
+                novoModo = "taxi";
+                // Se a pessoa já estiver no taxi, o custo fixo deve ser descontado
+                if (modoAtual == "taxi") {
+                    custoAresta -= 10;
                 }
-                // se não tiver dinheiro, vai caminhar
-                tempoAresta = calcularTempo(*edge, "walk");
-                novoModo = "walk";
-                }
-            else if (tipoTransporte == "walk") {
-                // se tiver andando, vai entrar no taxi se tiver dinheiro
-                if (dinheiroAtual + calcularCusto(*edge, "taxi") < K) {
-                    custoAresta = calcularCusto(*edge, "taxi") - 100;
-                    tempoAresta = calcularTempo(*edge, "taxi");
-                    novoModo = "taxi";
-                }
-                // se não tiver dinheiro, continua caminhando
-                tempoAresta = calcularTempo(*edge, "walk");
-                novoModo = "walk";
             }
+            // Se a aresta for caminhar
+            else if (tipoTransporte == "walk") {
+                tempoAresta = calcularTempo(*edge, "walk");
+                novoModo = "walk";
+            }    
 
-            // atualiza o gasto
+            // Atualiza o tempo e o dinheiro
+            novoTempo += tempoAresta;
             novoDinheiro += custoAresta;
 
-            // verifica se o custo está dentro do limite
+            // Verifica se o custo está dentro do limite
             if (novoDinheiro > K) {
-                // não considera este caminho
+                // Não considera este caminho
                 edge = edge->next();
                 continue;
             }
 
-            // adiciona o novo estado à fila
+            // Adiciona o novo estado à fila
             fila.push(Estado{
                 novoTempo,
                 novoDinheiro,
@@ -164,33 +173,10 @@ std::pair<std::vector<vertex>, int> obter_melhor_trajeto(
                 novoCaminho
             });
 
+            // Próxima aresta
             edge = edge->next();
         }
     }
 
-    // caso não encontre um caminho válido
-    return {std::vector<vertex>(), std::numeric_limits<int>::max()};
+    return {melhorCaminho, melhorTempo};
 }
-
-/*
-int main() {
-    // chamada da função para obter o melhor trajeto
-    std::pair<std::vector<vertex>, double> resultado = obter_melhor_trajeto(grafo, inicio, fim, K);
-
-    // Verificação e exibição do resultado
-    if (!resultado.first.empty()) {
-        std::cout << "Melhor caminho: ";
-        for (size_t i = 0; i < resultado.first.size(); ++i) {
-            std::cout << resultado.first[i];
-            if (i != resultado.first.size() - 1) {
-                std::cout << " -> ";
-            }
-        }
-        std::cout << "\nTempo total: " << resultado.second << " minutos" << std::endl;
-    } else {
-        std::cout << "Não foi encontrado um caminho válido dentro do limite de custo." << std::endl;
-    }
-
-    return 0;
-}
-*/

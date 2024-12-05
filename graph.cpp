@@ -25,7 +25,7 @@ Graph::~Graph() {
 
 // Função addEdge atualizada para incluir novos atributos
 void Graph::addEdge(vertex v1, vertex v2, double cost, int distance, const std::string& transport_type, double max_speed, double price_cost, double time_cost, int num_residencial, int num_commercial, int num_touristic, int num_industrial, int bus_preference) {
-    if (!hasEdge(v1, v2)) {
+    if (!hasEdge(v1, v2, transport_type)) {
         // Cria uma nova aresta com todos os atributos e adiciona à lista encadeada de arestas do vértice v1
         Edge* newEdge = new Edge(v1, v2, cost, distance, transport_type, max_speed, price_cost, time_cost, num_residencial, num_commercial, num_touristic, num_industrial, bus_preference, m_edges[v1]);
         m_edges[v1] = newEdge;
@@ -34,42 +34,46 @@ void Graph::addEdge(vertex v1, vertex v2, double cost, int distance, const std::
 }
 
 
-void Graph::removeEdge(vertex v1, vertex v2) {
+void Graph::removeEdge(vertex v1, vertex v2, const std::string& transport_type) {
     Edge* edge = m_edges[v1];
     Edge* prevEdge = nullptr;
     while (edge) {
-        if (edge->otherVertex(v1) == v2) {
+        if (edge->otherVertex(v1) == v2 && edge->transport_type() == transport_type) {
+            // Encontrou a aresta com os vértices e tipo de transporte corretos
             if (prevEdge) {
                 prevEdge->setNext(edge->next());
             } else {
-                m_edges[v1] = edge->next();
+                m_edges[v1] = edge->next();  // Remove da lista de v1
             }
-            delete edge;
-            m_numEdges--;
-            break;
+            delete edge;  // Libera a memória da aresta
+            m_numEdges--;  // Atualiza o contador de arestas
+            break;  // Sai do loop após remover a aresta
         }
         prevEdge = edge;
         edge = edge->next();
     }
 }
 
-bool Graph::hasEdge(vertex v1, vertex v2) {
+
+bool Graph::hasEdge(vertex v1, vertex v2, const std::string& transport_type) {
     Edge* edge = m_edges[v1];
     while (edge) {
-        if (edge->otherVertex(v1) == v2) {
-            return true;
+        // Verifica se a aresta corresponde aos vértices e tipo de transporte
+        if (edge->otherVertex(v1) == v2 && edge->transport_type() == transport_type) {
+            return true;  // A aresta foi encontrada
         }
-        edge = edge->next();
+        edge = edge->next();  // Avança para a próxima aresta
     }
-    return false;
+    return false;  // A aresta não foi encontrada
 }
+
 
 void Graph::print() const {
     for (const auto& pair : m_edges) {
         vertex v1 = pair.first;
         Edge* edge = pair.second;
         while (edge) {
-            std::cout << "(" << v1 << ", " << edge->otherVertex(v1) << ") ";
+            std::cout << "(" << v1 << ", " << edge->otherVertex(v1) << ", " << edge->distance() << ", " << edge->transport_type() << ") ";
             edge = edge->next();
         }
         std::cout << std::endl;

@@ -7,6 +7,7 @@
 #include "newMetro.h"
 #include "bus.h"
 #include "bus3.h"
+#include "fastRoute.h"
 #include <tuple>
 #include <fstream>
 
@@ -155,6 +156,21 @@ int main() {
     // (Opcional) Imprimir o grafo para verificar as arestas
     std::cout << "Grafo atualizado após adicionar as arestas da MST:" << std::endl;
     graph.print();
+
+    std::pair<std::vector<vertex>, double> resultado = obter_melhor_trajeto(graph, 1, 40, 2);
+
+    // Verificação e exibição do resultado
+    if (!resultado.first.empty()) {
+        std::cout << "Melhor caminho: ";
+        for (size_t i = 0; i < resultado.first.size(); ++i) {
+            std::cout << resultado.first[i];
+            if (i != resultado.first.size() - 1) {
+                std::cout << " -> ";
+            }
+        }
+        std::cout << "\nTempo total: " << resultado.second << " minutos" << std::endl;
+    } else {
+        std::cout << "Não foi encontrado um caminho válido dentro do limite de custo." << std::endl; }
 
     return 0;
 }

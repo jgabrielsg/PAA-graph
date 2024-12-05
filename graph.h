@@ -22,8 +22,8 @@ public:
     // Função addEdge atualizada para incluir novos atributos
     void addEdge(vertex v1, vertex v2, double cost, int distance, const std::string& transport_type, double max_speed, double price_cost, double time_cost, int num_residencial, int num_commercial, int num_touristic, int num_industrial, int bus_preference);
 
-    void removeEdge(vertex v1, vertex v2);
-    bool hasEdge(vertex v1, vertex v2);
+    void removeEdge(vertex v1, vertex v2, const std::string& transport_type);
+    bool hasEdge(vertex v1, vertex v2, const std::string& transport_type);
     void print() const;
     void loadFromJSON(const std::string& filename);  // Function to load graph from a JSON file
 
