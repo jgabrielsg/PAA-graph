@@ -84,6 +84,19 @@ def plot_highlighted_edges(G, node_colors, highlighted_edges):
     plt.axis('off')  # Desligar os eixos para melhor visualização
     plt.show()
 
+def plot_graph(G, node_colors):
+    # Extrair posições para plotagem
+    pos = nx.get_node_attributes(G, 'pos')
+
+    # Desenhar o grafo com as cores dos nós
+    plt.figure(figsize=(10, 10))
+    nx.draw(
+        G, pos, with_labels=True, node_size=100, node_color=node_colors,
+        font_size=6, font_weight='bold'
+    )
+    plt.title("City Graph - Nós Coloridos por Região")
+    plt.show()
+
 if __name__ == '__main__':
     # Parâmetros do grafo
     N, M = 24, 16  # Dimensões do grid
@@ -94,11 +107,11 @@ if __name__ == '__main__':
 
     with open('station_edges.txt', 'r', encoding='utf-8') as f:
         file_content = f.read()
-        highlighted_edges = ast.literal_eval(file_content)
+        highlighted_edges = [('node_0_0','node_0_1'),('node_0_1','node_1_1'),('node_1_1','node_1_2'),('node_1_2','node_1_3'),('node_1_3','node_2_3'),('node_2_3','node_2_4'),('node_2_4','node_3_4'),('node_3_4','node_3_2'),('node_3_2','node_3_1'),('node_3_1','node_4_1'),('node_4_1','node_4_0'),('node_4_0','node_5_0'),('node_5_0','node_5_3'),('node_5_3','node_6_3'),('node_6_3','node_6_5'),('node_6_5','node_6_6'),('node_6_6','node_6_7'),('node_6_7','node_6_8'),('node_6_8','node_6_9'),('node_6_9','node_7_9'),('node_7_9','node_8_9'),('node_8_9','node_8_10'),('node_8_10','node_7_10'),('node_7_10','node_7_11'),('node_7_11','node_7_12'),('node_7_12','node_7_13'),('node_7_13','node_8_13'),('node_8_13','node_8_11'),('node_8_11','node_9_11'),('node_9_11','node_10_11'),('node_10_11','node_10_9'),('node_10_9','node_10_8'),('node_10_8','node_10_6'),('node_10_6','node_11_6'),('node_11_6','node_11_5'),('node_11_5','node_11_3'),('node_11_3','node_11_1'),('node_11_3','node_11_1'),('node_11_5','node_11_3'),('node_11_6','node_11_5'),('node_10_6','node_11_6'),('node_10_4','node_10_6'),('node_9_4','node_10_4'),('node_9_3','node_9_4'),('node_8_3','node_9_3'),('node_7_3','node_8_3'),('node_7_5','node_7_3'),('node_6_5','node_7_5'),('node_5_5','node_6_5'),('node_4_5','node_5_5'),('node_3_5','node_4_5'),('node_2_5','node_3_5'),('node_2_4','node_2_5'),('node_2_3','node_2_4'),('node_1_3','node_2_3'),('node_1_2','node_1_3'),('node_1_1','node_1_2'),('node_0_1','node_1_1'),('node_0_0','node_0_1'),]
         
     # Criar o grafo NetworkX
     G, node_colors = create_graph(graph, N, M)
-
+    
     # Definir as arestas a serem destacadas
     highlighted_edges_set = set(tuple(sorted(edge)) for edge in highlighted_edges)
 
@@ -113,5 +126,6 @@ if __name__ == '__main__':
     if not existing_highlighted_edges:
         print("Nenhuma das arestas destacadas existe no grafo.")
     else:
+        plot_graph(G, node_colors)
         # Plotar o grafo com apenas as arestas destacadas
         plot_highlighted_edges(G, node_colors, existing_highlighted_edges)

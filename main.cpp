@@ -100,7 +100,7 @@ int main() {
     std::cout << "Estacoes feitas nos nós: " << std::endl;
     for (int i = 0; i < 4; i++) {
         vertex v1 = estacoes[i];
-        std::cout << "Regiao " << i << ": " << graph.getNodeId(v1) << std::endl;
+        std::cout << "Regiao " << i + 1 << ": " << graph.getNodeId(v1) << std::endl;
     }
 
     std::cout << "escavacaoMetro finalizado!" << std::endl;
