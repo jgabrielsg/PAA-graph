@@ -97,7 +97,7 @@ std::vector<std::vector<vertex>> criarRegioes(Graph& graph) {
     return regioes;
 }
 
-std::tuple<std::vector<Edge*>, int> escavacaoMetro(Graph& graph) {
+std::tuple<std::vector<Edge*>, int, std::vector<vertex>> escavacaoMetro(Graph& graph) {
     std::vector<vertex> estacoes;
     std::vector<Edge*> solucao;  
     std::vector<std::vector<vertex>> regioes;
@@ -200,5 +200,5 @@ std::tuple<std::vector<Edge*>, int> escavacaoMetro(Graph& graph) {
 
     Kruskal::mstKruskalFast(solucao, subgrafo);
 
-    return std::make_tuple(solucao, TotalCost);
+    return std::make_tuple(solucao, TotalCost, estacoes);
 }

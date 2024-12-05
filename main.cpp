@@ -92,9 +92,16 @@ int main() {
 
     std::cout << "Iniciando escavacaoMetro..." << std::endl;
     
-    std::tuple<std::vector<Edge*>, int> result = escavacaoMetro(graph);
+    std::tuple<std::vector<Edge*>, int, std::vector<vertex>> result = escavacaoMetro(graph);
     std::vector<Edge*> mst = std::get<0>(result);
     int totalCost = std::get<1>(result);
+    std::vector<vertex> estacoes = std::get<2>(result);
+
+    std::cout << "Estacoes feitas nos nós: " << std::endl;
+    for (int i = 0; i < 4; i++) {
+        vertex v1 = estacoes[i];
+        std::cout << "Regiao " << i << ": " << graph.getNodeId(v1) << std::endl;
+    }
 
     std::cout << "escavacaoMetro finalizado!" << std::endl;
 
@@ -126,11 +133,11 @@ int main() {
     }
     outFile << "]" << std::endl;
 
+    std::cout << "Custo total de excavacao: " << std::get<1>(result) << std::endl;
+
     designBusRoute(graph);
 
     outFile.close();
-
-    std::cout << "Custo total de excavacao: " << std::get<1>(result) << std::endl;
 
     return 0;
 }

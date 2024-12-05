@@ -6,7 +6,7 @@
 #include <tuple>
 
 std::vector<std::vector<vertex>> criarRegioes(Graph &g);
-std::tuple<std::vector<Edge*>, int> escavacaoMetro(Graph& graph);
+std::tuple<std::vector<Edge*>, int, std::vector<vertex>> escavacaoMetro(Graph& graph);
 
 class Dijkstra {
 public:
