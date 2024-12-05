@@ -29,4 +29,4 @@ Além disso, o código também otimiza trajetos com base no tempo e no custo. Ut
    Após instalar o MSYS2, abra o terminal do MSYS2 e navegue até o diretório onde os arquivos do projeto estão localizados. Execute o seguinte comando para compilar todos os arquivos e gerar o executável:
 
    ```bash
-   g++ -std=c++17 main.cpp Graph.cpp dataStructures.cpp newMetro.cpp bus.cpp bus3.cpp fastestRouteQ3.cpp  -o teste
+   g++ -std=c++17 main.cpp Graph.cpp dataStructures.cpp newMetro.cpp bus.cpp bus3.cpp fastestRouteQ3.cpp -o main
