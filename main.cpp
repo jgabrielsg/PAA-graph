@@ -92,16 +92,35 @@ int main() {
 
     std::cout << "Iniciando escavacaoMetro..." << std::endl;
     
-    std::tuple<std::vector<Edge*>, int, std::vector<vertex>> result = escavacaoMetro(graph);
+    std::tuple<std::vector<Edge*>, int,  std::unordered_map<vertex, std::tuple<std::vector<vertex>, std::vector<int>>>> result = escavacaoMetro(graph);
     std::vector<Edge*> mst = std::get<0>(result);
     int totalCost = std::get<1>(result);
-    std::vector<vertex> estacoes = std::get<2>(result);
+     std::unordered_map<vertex, std::tuple<std::vector<vertex>, std::vector<int>>> estacoes = std::get<2>(result);
 
     std::cout << "Estacoes feitas nos nós: " << std::endl;
-    for (int i = 0; i < 4; i++) {
-        vertex v1 = estacoes[i];
-        std::cout << "Regiao " << i + 1 << ": " << graph.getNodeId(v1) << std::endl;
+    for (const auto& entry1 : estacoes) {
+        vertex v1 = entry1.first;
+
+        // Access the parent and distancia vectors from the tuple
+        const std::vector<vertex>& parent = std::get<0>(entry1.second);  // parent vector
+        const std::vector<int>& distancia = std::get<1>(entry1.second);  // distancia vector
+
+        for (const auto& entry2 : estacoes) {
+            vertex v2 = entry2.first;
+
+            if (v1 != v2) {
+                if (!graph.hasEdge(v1, v2) && !graph.hasEdge(v2, v1)) {
+                    // Here we should add the edge between v1 and v2 in the graph, using `parent`
+                    graph.addEdge(v1, v2, 0, distancia[v2], "metro", 20, 0, 0, 0, 0, 0, 0, 0);
+                }
+            }
+        }
+
+        // Now printing the station information for each region
+        std::cout << "Regiao " << v1 << ": " << graph.getNodeId(v1) << std::endl;
     }
+
+
 
     std::cout << "escavacaoMetro finalizado!" << std::endl;
 

@@ -97,7 +97,7 @@ std::vector<std::vector<vertex>> criarRegioes(Graph& graph) {
     return regioes;
 }
 
-std::tuple<std::vector<Edge*>, int, std::vector<vertex>> escavacaoMetro(Graph& graph) {
+std::tuple<std::vector<Edge*>, int,  std::unordered_map<vertex, std::tuple<std::vector<vertex>, std::vector<int>>>> escavacaoMetro(Graph& graph) {
     std::vector<vertex> estacoes;
     std::vector<Edge*> solucao;  
     std::vector<std::vector<vertex>> regioes;
@@ -105,10 +105,14 @@ std::tuple<std::vector<Edge*>, int, std::vector<vertex>> escavacaoMetro(Graph& g
     regioes = criarRegioes(graph);
     int numVertices = graph.getNumVertices();
 
-    std::unordered_map<vertex, std::vector<vertex>> parentMap;
+    // Updated parentMap to store a tuple (parent, distancia)
+    std::unordered_map<vertex, std::tuple<std::vector<vertex>, std::vector<int>>> parentMap;
+
 
     for (const auto& regiao : regioes) {
         std::vector<vertex> bestParent;
+        std::vector<int> bestDistancia;
+
         int minMaxDist = INT_MAX;
         vertex c_min = -1;
 
@@ -126,28 +130,33 @@ std::tuple<std::vector<Edge*>, int, std::vector<vertex>> escavacaoMetro(Graph& g
             if (maxDist < minMaxDist) {
                 minMaxDist = maxDist;
                 bestParent = parent;
+                bestDistancia = distancia;
                 c_min = v;
             }
         }
 
         estacoes.push_back(c_min);
-        parentMap[c_min] = bestParent;
+
+        // Store both bestParent and bestDistancia in the tuple
+        parentMap[c_min] = std::make_tuple(bestParent, bestDistancia);
     }
 
-    // construindo um subgrafo
+    // Construindo um subgrafo
     Graph subgrafo(numVertices);
 
     for (vertex v1 : estacoes) {
         for (vertex v2 : estacoes) {
             if (v1 == v2) continue; // Skip if both vertices are the same
 
-            // Retrieve the parent array for station v1
+            // Retrieve the parent and distancia arrays for station v1
             auto it = parentMap.find(v1);
             if (it == parentMap.end()) {
                 std::cerr << "No parent array found for station " << v1 << std::endl;
                 continue;
             }
-            const std::vector<vertex>& parent = it->second;
+
+            const std::vector<vertex>& parent = std::get<0>(it->second); // Get the parent vector
+            const std::vector<int>& distancia = std::get<1>(it->second); // Get the distancia vector
 
             // Traverse from v2 back to v1 using the parent array
             vertex current = v2;
@@ -200,5 +209,6 @@ std::tuple<std::vector<Edge*>, int, std::vector<vertex>> escavacaoMetro(Graph& g
 
     Kruskal::mstKruskalFast(solucao, subgrafo);
 
-    return std::make_tuple(solucao, TotalCost, estacoes);
+    // Return the solution, total cost, and updated parentMap
+    return std::make_tuple(solucao, TotalCost, parentMap);
 }
