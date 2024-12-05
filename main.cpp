@@ -123,14 +123,6 @@ int main() {
 
     std::cout << "escavacaoMetro finalizado!" << std::endl;
 
-    // std::cout << "[";
-    // for (const auto& edge : mst) {
-    //     if (edge) {
-    //         std::cout << "('" << graph.getNodeId(edge->v1()) << "','" << graph.getNodeId(edge->v2()) << "'),";
-    //     }
-    // }
-    // std::cout << "]" << std::endl;
-
     std::ofstream outFile("station_edges.txt");
     if (!outFile.is_open()) {
         std::cerr << "Falha ao abrir o arquivo para escrita." << std::endl;
