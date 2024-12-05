@@ -20,13 +20,13 @@ struct Estado {
 // Função para calcular o tempo baseado no tipo de transporte
 double calcularTempo(const Edge& edge, const std::string& transport_type) {
     if (transport_type == "metro") {
-        return (edge.distance() / 70.0) * 60.0; // Tempo em minutos
+        return (edge.distance() / 20.0) / 60.0; // Tempo em minutos
     } else if (transport_type == "onibus") {
-        return (edge.distance() / 50.0) * 60.0;
+        return (edge.distance() / 12.0) / 60.0;
     } else if (transport_type == "taxi") {
-        return (edge.distance() / 50.0) * 60.0;
+        return (edge.distance() / 15.0) / 60.0;
     } else if (transport_type == "walk") {
-        return (edge.distance() / 5.0) * 60.0;
+        return (edge.distance() / 1.5) / 60.0;
     }
     return std::numeric_limits<double>::max();
 }
@@ -38,7 +38,7 @@ double calcularCusto(const Edge& edge, const std::string& transport_type) {
     } else if (transport_type == "onibus") {
         return 3.50;
     } else if (transport_type == "taxi") {
-        return std::max(10.0, 2.50 * edge.distance());
+        return 10.0 + 2.50 * (edge.distance()/1000);
     }
     return std::numeric_limits<double>::max();
 }
@@ -124,47 +124,19 @@ std::pair<std::vector<vertex>, double> obter_melhor_trajeto(
             }
             // Se a aresta for uma linha de taxi 
             else if (tipoTransporte == "taxi") {
-                // Se a pessoa já estiver no taxi, ela continua nele
+                custoAresta = calcularCusto(*edge, "taxi");
+                tempoAresta = calcularTempo(*edge, "taxi");
+                novoModo = "taxi";
+                // Se a pessoa já estiver no taxi, o custo fixo deve ser descontado
                 if (modoAtual == "taxi") {
-                    custoAresta = calcularCusto(*edge, "taxi");
-                    tempoAresta = calcularTempo(*edge, "taxi");
-                    novoModo = "taxi";
-                }
-                // Se não estiver no taxi, pode optar por pegar um taxi ou caminhar
-                else {
-                    // Opção 1: Pegar um taxi
-                    double custoTaxi = calcularCusto(*edge, "taxi");
-                    double tempoTaxi = calcularTempo(*edge, "taxi");
-                    if (dinheiroAtual + custoTaxi <= K) {
-                        std::vector<vertex> caminhoTaxi = novoCaminho;
-                        fila.push(Estado{
-                            tempoAtual + tempoTaxi,
-                            dinheiroAtual + custoTaxi,
-                            vizinho,
-                            "taxi",
-                            caminhoTaxi
-                        });
-                    }
-
-                    // Opção 2: Caminhar
-                    double tempoWalk = calcularTempo(*edge, "walk");
-                    novoModo = "walk";
-                    tempoAresta = tempoWalk;
-                    // Nenhum custo adicional para caminhar
+                    custoAresta -= 10;
                 }
             }
             // Se a aresta for caminhar
             else if (tipoTransporte == "walk") {
-                // Se estiver caminhando, continua caminhando
-                if (modoAtual == "walk") {
-                    tempoAresta = calcularTempo(*edge, "walk");
-                }
-                // Se estiver em outro modo, pode optar por caminhar
-                else {
-                    tempoAresta = calcularTempo(*edge, "walk");
-                }
+                tempoAresta = calcularTempo(*edge, "walk");
                 novoModo = "walk";
-            }
+            }    
 
             // Atualiza o tempo e o dinheiro
             novoTempo += tempoAresta;
