@@ -6,6 +6,10 @@
 #include <vector>
 #include <string>
 
+double calculateEdgeWeight(const Edge&);
+std::vector<vertex> findHamiltonianCycle(Graph&);
+void designBusRoute(Graph&);
+
 // Define uma estrutura para Região
 struct Region {
     int number;

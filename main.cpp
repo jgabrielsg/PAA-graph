@@ -4,7 +4,8 @@
 #include <unordered_map>
 #include "external/json.hpp"
 #include "graph.h"
-#include "newMetro.h"  
+#include "newMetro.h"
+#include "bus.h"
 #include <tuple>
 #include <fstream>
 
@@ -124,6 +125,8 @@ int main() {
         }
     }
     outFile << "]" << std::endl;
+
+    designBusRoute(graph);
 
     outFile.close();
 
