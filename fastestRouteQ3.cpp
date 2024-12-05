@@ -171,3 +171,26 @@ std::pair<std::vector<vertex>, int> obter_melhor_trajeto(
     // caso não encontre um caminho válido
     return {std::vector<vertex>(), std::numeric_limits<int>::max()};
 }
+
+/*
+int main() {
+    // chamada da função para obter o melhor trajeto
+    std::pair<std::vector<vertex>, double> resultado = obter_melhor_trajeto(grafo, inicio, fim, K);
+
+    // Verificação e exibição do resultado
+    if (!resultado.first.empty()) {
+        std::cout << "Melhor caminho: ";
+        for (size_t i = 0; i < resultado.first.size(); ++i) {
+            std::cout << resultado.first[i];
+            if (i != resultado.first.size() - 1) {
+                std::cout << " -> ";
+            }
+        }
+        std::cout << "\nTempo total: " << resultado.second << " minutos" << std::endl;
+    } else {
+        std::cout << "Não foi encontrado um caminho válido dentro do limite de custo." << std::endl;
+    }
+
+    return 0;
+}
+*/
